@@ -2,7 +2,8 @@ name: Main CI-pipeline
 
 on:
   push:
-    branches: ["Lab_1"]
+    branches:
+      - 'Lab**'
 
 jobs:
   build:
