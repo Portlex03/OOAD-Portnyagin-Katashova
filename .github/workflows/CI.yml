@@ -1,0 +1,29 @@
+name: Lab1_Move CI-pipeline
+
+on:
+  push:
+    branches: ["Lab1_Move"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 7.0.x
+ 
+      - name: Restore dependencies
+        run: cd spacebattle && dotnet restore SpaceBattle.Lib
+
+      - name: Build
+        run: cd spacebattle && dotnet build SpaceBattle.Lib --no-restore /p:ContinuousIntegrationBuild=true
+
+      - name: Test
+        run: cd spacebattle/SpaceBattle.Lib.Tests/ &&  dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
+
+      - name: Checkstyle
+        run: cd spacebattle/SpaceBattle.Lib.Tests/ && dotnet format --verify-no-changes

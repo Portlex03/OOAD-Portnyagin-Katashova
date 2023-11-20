@@ -6,7 +6,7 @@ public class VectorTest
     [Fact]
     public void CheckGetHashCode()
     {
-        Vector vector = new Vector(1,5);
+        Vector vector = new Vector(1, 5);
 
         int check = vector.GetHashCode();
 

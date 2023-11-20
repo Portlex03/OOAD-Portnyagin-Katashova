@@ -40,7 +40,7 @@ public class MoveCommandTest
         Assert.Throws<Exception>(mc.Execute);
     }
 
-    [Fact] 
+    [Fact]
     public void ImpossibleToDetermineInstantaneousSpeedOfGameObject()
     {
         //pre
@@ -57,7 +57,7 @@ public class MoveCommandTest
     }
 
     [Fact]
-    public void  ImpossibleToChangePositionOfGameObject()
+    public void ImpossibleToChangePositionOfGameObject()
     {
         //pre
 
