@@ -17,7 +17,7 @@ public class Vector
 
     public override bool Equals(object? obj)
     {
-        return obj is Vector;
+        return obj != null && obj is Vector vector && coordinates.SequenceEqual(vector.coordinates);
     }
 
     public override int GetHashCode()
