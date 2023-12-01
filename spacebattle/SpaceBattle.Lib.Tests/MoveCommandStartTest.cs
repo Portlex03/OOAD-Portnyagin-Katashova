@@ -5,7 +5,8 @@ using Moq;
 
 public class MoveCommandStartTest
 {
-    public MoveCommandStartTest()
+    private readonly static Mock<IQueue> q;
+    static MoveCommandStartTest()
     {
         new InitScopeBasedIoCImplementationCommand().Execute();
 
@@ -20,6 +21,12 @@ public class MoveCommandStartTest
             "IoC.Register","InitialValues.Set",
             (object[] args) => setInitialValuesCommand.Object 
         ).Execute();
+
+        q = new Mock<IQueue>();
+        IoC.Resolve<ICommand>(
+            "IoC.Register","Game.Queue", 
+            (object[] args) => q.Object
+        ).Execute();
     }
 
     [Fact]
@@ -32,13 +39,8 @@ public class MoveCommandStartTest
         startable.Setup(s => s.InitialValues).Returns(
             new Dictionary<string, object>() {{"Velocity",new Vector(1,1)}}
         );
-        var moveCommandStart = new MoveCommandStart(startable.Object);
 
-        var q = new Mock<IQueue>();
-        IoC.Resolve<ICommand>(
-            "IoC.Register","Game.Queue", 
-            (object[] args) => q.Object
-        ).Execute();
+        var moveCommandStart = new MoveCommandStart(startable.Object);
 
         moveCommandStart.Execute();
 
@@ -56,13 +58,8 @@ public class MoveCommandStartTest
         startable.Setup(s => s.InitialValues).Returns(
             new Dictionary<string, object>() {{"Velocity",new Vector(1,1)}}
         );
-        var moveCommandStart = new MoveCommandStart(startable.Object);
 
-        var q = new Mock<IQueue>();
-        IoC.Resolve<ICommand>(
-            "IoC.Register","Game.Queue", 
-            (object[] args) => q.Object
-        ).Execute();
+        var moveCommandStart = new MoveCommandStart(startable.Object);
 
         Assert.Throws<Exception>(moveCommandStart.Execute);
     }
@@ -75,13 +72,8 @@ public class MoveCommandStartTest
         var startable = new Mock<IMoveCommandStartable>();
         startable.Setup(s => s.Target).Returns(uobject.Object);
         startable.Setup(s => s.InitialValues).Throws(() => new Exception()).Verifiable();
-        var moveCommandStart = new MoveCommandStart(startable.Object);
 
-        var q = new Mock<IQueue>();
-        IoC.Resolve<ICommand>(
-            "IoC.Register","Game.Queue", 
-            (object[] args) => q.Object
-        ).Execute();
+        var moveCommandStart = new MoveCommandStart(startable.Object);
 
         Assert.Throws<Exception>(moveCommandStart.Execute);
     }
