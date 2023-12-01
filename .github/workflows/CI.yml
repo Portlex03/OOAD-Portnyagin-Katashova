@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - 'Lab**'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 7.0.x
+
+      - name: Restore dependencies
+        run: cd spacebattle && dotnet restore SpaceBattle.Lib.Tests
+
+      - name: Install Required Tools
+        run: |
+          dotnet new tool-manifest
+          dotnet tool install dotnet-coverage
+          dotnet tool install coverlet.console
+      - name: Build
+        run: cd spacebattle && dotnet build
+      - name: Coverage and test
+        run: cd spacebattle && dotnet coverlet SpaceBattle.Lib.Tests/bin/Debug/net7.0/SpaceBattle.Lib.Tests.dll --target "dotnet" --targetargs "test --no-build" -f=opencover -o="coverage.xml"
+      
