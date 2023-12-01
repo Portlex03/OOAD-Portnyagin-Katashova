@@ -1,4 +1,5 @@
 namespace SpaceBattle.Lib;
+using Hwdtech;
 
 public interface IRotatable
 {
