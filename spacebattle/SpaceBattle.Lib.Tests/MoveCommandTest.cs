@@ -1,4 +1,6 @@
 ﻿namespace SpaceBattle.Lib.Tests;
+
+using System.Runtime.CompilerServices;
 using Moq;
 
 public class MoveCommandTest
@@ -35,9 +37,12 @@ public class MoveCommandTest
         var mc = new MoveCommand(movable.Object);
 
         //act
+
+        var act = () => mc.Execute();
+
         //post
 
-        Assert.Throws<Exception>(mc.Execute);
+        Assert.Throws<Exception>(act);
     }
 
     [Fact]
@@ -51,9 +56,12 @@ public class MoveCommandTest
         var mc = new MoveCommand(movable.Object);
 
         //act
+
+        var act = () => mc.Execute();
+
         //post
 
-        Assert.Throws<Exception>(mc.Execute);
+        Assert.Throws<Exception>(act);
     }
 
     [Fact]

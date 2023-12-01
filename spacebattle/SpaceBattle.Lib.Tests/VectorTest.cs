@@ -31,4 +31,18 @@ public class VectorTest
 
         Assert.False(vector1.Equals(vector));
     }
+
+    [Fact]
+    public void AdditionVectors()
+    {
+        // pred
+        Vector a = new Vector (new int [] { 1, 2, 3 });
+        Vector b = new Vector (new int [] { 4, 5, 6 });
+
+        // act
+        Vector result = a + b;
+
+        // post
+        Assert.True(typeof(Vector).IsInstanceOfType(result));
+    }
 }

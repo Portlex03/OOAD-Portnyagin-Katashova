@@ -1,8 +1,9 @@
-name: Lab1_Move CI-pipeline
+name: CI-pipeline
 
 on:
   push:
-    branches: ["Lab1_Move"]
+    branches: 
+      - 'Lab**'
 
 jobs:
   build:
