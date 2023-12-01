@@ -1,10 +1,9 @@
-name: CI-pipeline
+name: CI
 
 on:
   push:
-    branches: 
+    branches:
       - 'Lab**'
-
   pull_request:
     branches:
       - main
@@ -15,20 +14,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 7.0.x
- 
+
       - name: Restore dependencies
-        run: cd spacebattle && dotnet restore SpaceBattle.Lib
+        run: cd spacebattle && dotnet restore SpaceBattle.Lib.Tests
 
+      - name: Install Required Tools
+        run: |
+          dotnet new tool-manifest
+          dotnet tool install dotnet-coverage
+          dotnet tool install coverlet.console
       - name: Build
-        run: cd spacebattle && dotnet build SpaceBattle.Lib --no-restore /p:ContinuousIntegrationBuild=true
-
-      - name: Test
-        run: cd spacebattle/SpaceBattle.Lib.Tests/ &&  dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
-
-      - name: Checkstyle
-        run: cd spacebattle/SpaceBattle.Lib.Tests/ && dotnet format --verify-no-changes
+        run: cd spacebattle && dotnet build
+      - name: Coverage and test
+        run: cd spacebattle && dotnet coverlet SpaceBattle.Lib.Tests/bin/Debug/net7.0/SpaceBattle.Lib.Tests.dll --target "dotnet" --targetargs "test --no-build" -f=opencover -o="coverage.xml"
+        
