@@ -6,12 +6,18 @@ using Moq;
 
 public class DecisionTreeTest
 {
-    readonly static string path;
-    readonly static Mock<ICommandReturnable> cmd;
+    readonly string path;
+    readonly Mock<ICommandReturnable> cmd;
 
-    static DecisionTreeTest()
+    public DecisionTreeTest()
     {
         new InitScopeBasedIoCImplementationCommand().Execute();
+
+        IoC.Resolve<ICommand>(
+            "Scopes.Current.Set", 
+            IoC.Resolve<object>("Scopes.New", 
+            IoC.Resolve<object>("Scopes.Root")))
+        .Execute();
 
         cmd = new Mock<ICommandReturnable>();
         IoC.Resolve<ICommand>(
