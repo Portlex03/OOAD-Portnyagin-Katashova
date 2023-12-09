@@ -5,10 +5,16 @@ using Moq;
 
 public class MoveCommandStartTest
 {
-    private readonly static Mock<IQueue> q;
-    static MoveCommandStartTest()
+    private readonly Mock<IQueue> q;
+    public MoveCommandStartTest()
     {
         new InitScopeBasedIoCImplementationCommand().Execute();
+
+        IoC.Resolve<ICommand>(
+            "Scopes.Current.Set", 
+            IoC.Resolve<object>("Scopes.New", 
+            IoC.Resolve<object>("Scopes.Root"))
+        ).Execute();
 
         var movement = new Mock<ICommand>();
         IoC.Resolve<ICommand>(
