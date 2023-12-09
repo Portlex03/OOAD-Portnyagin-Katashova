@@ -7,7 +7,6 @@ using Moq;
 public class DecisionTreeTest
 {
     readonly string path;
-    readonly Mock<ICommandReturnable> cmd;
 
     public DecisionTreeTest()
     {
@@ -19,15 +18,11 @@ public class DecisionTreeTest
             IoC.Resolve<object>("Scopes.Root")))
         .Execute();
 
-        cmd = new Mock<ICommandReturnable>();
+        var tree = new Dict();
         IoC.Resolve<ICommand>(
-            "IoC.Register","Game.DecisionTree",
-            (object[] args) => cmd.Object.Execute(args)
+            "IoC.Register", "Game.DecisionTree", 
+            (object[] args) => tree
         ).Execute();
-
-        cmd.Setup(t => t.Execute(
-            It.IsAny<object[]>()
-        )).Returns(new Dict()).Verifiable();
 
         path = @"../../../Vectors.txt";
     }
