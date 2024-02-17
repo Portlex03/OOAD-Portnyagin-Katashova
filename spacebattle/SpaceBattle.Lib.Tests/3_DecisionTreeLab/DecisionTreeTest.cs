@@ -24,7 +24,7 @@ public class DecisionTreeTest
             (object[] args) => tree
         ).Execute();
 
-        path = @"../../../Vectors.txt";
+        path = @"../../../3_DecisionTreeLab/Vectors.txt";
     }
 
     [Fact]
