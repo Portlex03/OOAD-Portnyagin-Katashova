@@ -15,11 +15,13 @@ public class DecisionTreeCommand : ICommand
 
         var tree = IoC.Resolve<Dict>("Game.DecisionTree");
 
-        vectors.ForEach(vector => {
+        vectors.ForEach(vector =>
+        {
             var layer = tree;
-            vector.ForEach(num => {
-                layer.TryAdd(num, new Dict()); 
-                layer = (Dict) layer[num];
+            vector.ForEach(num =>
+            {
+                layer.TryAdd(num, new Dict());
+                layer = (Dict)layer[num];
             });
         });
     }
