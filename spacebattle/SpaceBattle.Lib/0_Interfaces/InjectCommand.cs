@@ -8,5 +8,5 @@ public class InjectCommand : ICommand, IInjectable
 
     public void Execute() => _cmd.Execute();
 
-    public void Inject(object obj) => _cmd = (ICommand) obj;
+    public void Inject(object obj) => _cmd = (ICommand)obj;
 }

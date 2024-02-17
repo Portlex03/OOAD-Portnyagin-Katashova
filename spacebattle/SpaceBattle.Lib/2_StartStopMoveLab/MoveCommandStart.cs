@@ -9,7 +9,7 @@ public class MoveCommandStart : ICommand
 
     public void Execute()
     {
-        _order.InitialValues.ToList().ForEach(a => IoC.Resolve<ICommand>("InitialValues.Set",_order.Target,a.Key,a.Value).Execute());
+        _order.InitialValues.ToList().ForEach(a => IoC.Resolve<ICommand>("InitialValues.Set", _order.Target, a.Key, a.Value).Execute());
 
         var cmd = IoC.Resolve<ICommand>("Operations.Movement", _order.Target);
 

@@ -5,7 +5,7 @@ public interface IRotatable
 {
     public int Angle { get; set; }
     public int AngularVelocity { get; }
-    public float N{ get; }
+    public float N { get; }
 }
 
 public class RotateCommand : ICommand

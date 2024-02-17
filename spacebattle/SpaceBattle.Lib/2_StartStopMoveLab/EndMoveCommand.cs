@@ -8,10 +8,10 @@ public class EndMoveCommand : ICommand
 
     public void Execute()
     {
-        _endable.RequiredValues.ToList().ForEach(key => 
+        _endable.RequiredValues.ToList().ForEach(key =>
             IoC.Resolve<ICommand>(
-                "Game.UObject.DeleteProperty", 
-                _endable.Target, 
+                "Game.UObject.DeleteProperty",
+                _endable.Target,
                 key.Key
             ).Execute()
         );

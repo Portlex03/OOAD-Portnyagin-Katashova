@@ -31,7 +31,7 @@ public class EndMoveCommandTest
         var mockEndable = new Mock<IMoveCommandEndable>();
 
         mockEndable.Setup(end => end.Target).Returns(mockUObject.Object).Verifiable();
-        mockEndable.Setup(end => end.RequiredValues).Returns(new Dictionary <string, object>() {{ "Velocity", new Vector(1,1) }}).Verifiable();
+        mockEndable.Setup(end => end.RequiredValues).Returns(new Dictionary<string, object>() { { "Velocity", new Vector(1, 1) } }).Verifiable();
 
         var endMoveCommand = IoC.Resolve<ICommand>("Game.Command.EndMovement", mockEndable.Object);
 
@@ -81,7 +81,7 @@ public class EndMoveCommandTest
         var mockEndable = new Mock<IMoveCommandEndable>();
 
         mockEndable.Setup(end => end.Target).Throws(new Exception()).Verifiable();
-        mockEndable.Setup(end => end.RequiredValues).Returns(new Dictionary<string, object> {{ "Velocity", new Vector(1,1) }}).Verifiable();
+        mockEndable.Setup(end => end.RequiredValues).Returns(new Dictionary<string, object> { { "Velocity", new Vector(1, 1) } }).Verifiable();
 
         var endMoveCommand = IoC.Resolve<ICommand>("Game.Command.EndMovement", mockEndable.Object);
 
