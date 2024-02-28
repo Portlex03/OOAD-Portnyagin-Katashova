@@ -14,19 +14,23 @@ public class ServerThread
     {
         _q = q;
 
-        _behaviour = () => {
+        _behaviour = () =>
+        {
             var cmd = q.Take();
-            try {
+            try
+            {
                 cmd.Execute();
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 IoC.Resolve<ICommand>("Exception.Handler", cmd, e).Execute();
             }
         };
 
-        _t = new Thread( () => {
-            while(!_stop) {
+        _t = new Thread(() =>
+        {
+            while (!_stop)
                 _behaviour();
-            }
         });
     }
     public bool QueueIsEmpty { get => _q.Count == 0; }
@@ -38,6 +42,5 @@ public class ServerThread
 
     public Action GetBehaviour() => _behaviour;
 
-    public void UpdateBehaviour(Action newBehaviour) => _behaviour = newBehaviour; 
-
+    public void UpdateBehaviour(Action newBehaviour) => _behaviour = newBehaviour;
 }

@@ -35,7 +35,8 @@ public class ServerThreadTest
         // стратегия инициализации и запуска сервера
         IoC.Resolve<ICommand>(
             "IoC.Register", "Thread.Create&Start",
-            (object[] args) => {
+            (object[] args) =>
+            {
                 var threadId = (int)args[0];
                 var actionCommand = new ActionCommand((Action)args[1]);
 
@@ -53,8 +54,10 @@ public class ServerThreadTest
         // стратегия получения HardStopCommand
         IoC.Resolve<ICommand>(
             "IoC.Register", "Thread.HardStop",
-            (object[] args) => {
-                return new ActionCommand(() => {
+            (object[] args) =>
+            {
+                return new ActionCommand(() =>
+                {
                     new HardStopCommand((ServerThread)args[0]).Execute();
                     new ActionCommand((Action)args[1]).Execute();
                 });
@@ -67,13 +70,13 @@ public class ServerThreadTest
             (object[] args) => new SoftStopCommand((ServerThread)args[0], (Action)args[1])
         ).Execute();
     }
-    
+
     [Fact]
     public void HardStopMustStopServerThread()
     {
         var threadId = 1;
-        var serverThread = IoC.Resolve<ServerThread>("Thread.Create&Start", threadId, () => {});
-        
+        var serverThread = IoC.Resolve<ServerThread>("Thread.Create&Start", threadId, () => { });
+
         var senderDict = IoC.Resolve<QueueDict>("Thread.GetSenderDict");
 
         var usualCommand = new Mock<ICommand>();
@@ -100,8 +103,8 @@ public class ServerThreadTest
     public void SoftStopMustStopServerThread()
     {
         var threadId = 2;
-        var serverThread = IoC.Resolve<ServerThread>("Thread.Create&Start", threadId, () => {});
-        
+        var serverThread = IoC.Resolve<ServerThread>("Thread.Create&Start", threadId, () => { });
+
         var senderDict = IoC.Resolve<QueueDict>("Thread.GetSenderDict");
 
         var usualCommand = new Mock<ICommand>();
@@ -130,8 +133,8 @@ public class ServerThreadTest
     public void ServerThreadCanWorkWithExceptionCommands()
     {
         var threadId = 3;
-        var serverThread = IoC.Resolve<ServerThread>("Thread.Create&Start", threadId, () => {});
-        
+        var serverThread = IoC.Resolve<ServerThread>("Thread.Create&Start", threadId, () => { });
+
         var senderDict = IoC.Resolve<QueueDict>("Thread.GetSenderDict");
 
         var usualCommand = new Mock<ICommand>();

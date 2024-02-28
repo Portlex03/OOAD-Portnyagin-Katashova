@@ -6,7 +6,7 @@ public class SoftStopCommand : ICommand
 {
     ServerThread _t;
     Action _action;
-    public SoftStopCommand(ServerThread t, Action action) 
+    public SoftStopCommand(ServerThread t, Action action)
     {
         _t = t;
         _action = action;
