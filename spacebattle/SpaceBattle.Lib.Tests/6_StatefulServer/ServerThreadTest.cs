@@ -77,9 +77,9 @@ public class ServerThreadTest
     public void HardStopMustStopServerThread()
     {
         var threadId = 1;
-        var serverThread = IoC.Resolve<ServerThread>(
-            "Thread.Create&Start", threadId, () => { _newScope.Execute(); });
+        IoC.Resolve<ServerThread>("Thread.Create&Start", threadId, () => { _newScope.Execute(); });
 
+        var threadDict = IoC.Resolve<ThreadDict>("Thread.GetThreadDict");
         var senderDict = IoC.Resolve<QueueDict>("Thread.GetSenderDict");
 
         var usualCommand = new Mock<ICommand>();
@@ -91,7 +91,7 @@ public class ServerThreadTest
 
         senderDict[threadId].Add(usualCommand.Object);
 
-        senderDict[threadId].Add(IoC.Resolve<ICommand>("Thread.HardStop", serverThread, () => { mre.Set(); }));
+        senderDict[threadId].Add(IoC.Resolve<ICommand>("Thread.HardStop", threadDict[threadId], () => { mre.Set(); }));
 
         senderDict[threadId].Add(usualCommand.Object);
 
@@ -99,16 +99,16 @@ public class ServerThreadTest
 
         usualCommand.Verify(cmd => cmd.Execute(), Times.Exactly(2));
         Assert.Single(senderDict[threadId]);
-        Assert.False(serverThread.IsAlive);
+        Assert.False(threadDict[threadId].IsAlive);
     }
 
     [Fact]
     public void SoftStopMustStopServerThread()
     {
         var threadId = 2;
-        var serverThread = IoC.Resolve<ServerThread>(
-            "Thread.Create&Start", threadId, () => { _newScope.Execute(); });
+        IoC.Resolve<ServerThread>("Thread.Create&Start", threadId, () => { _newScope.Execute(); });
 
+        var threadDict = IoC.Resolve<ThreadDict>("Thread.GetThreadDict");
         var senderDict = IoC.Resolve<QueueDict>("Thread.GetSenderDict");
 
         var usualCommand = new Mock<ICommand>();
@@ -120,7 +120,7 @@ public class ServerThreadTest
 
         senderDict[threadId].Add(usualCommand.Object);
 
-        senderDict[threadId].Add(IoC.Resolve<ICommand>("Thread.SoftStop", serverThread, () => { mre.Set(); }));
+        senderDict[threadId].Add(IoC.Resolve<ICommand>("Thread.SoftStop", threadDict[threadId], () => { mre.Set(); }));
 
         senderDict[threadId].Add(usualCommand.Object);
 
@@ -129,17 +129,17 @@ public class ServerThreadTest
         mre.WaitOne();
 
         usualCommand.Verify(cmd => cmd.Execute(), Times.Exactly(4));
-        Assert.True(serverThread.QueueIsEmpty);
-        Assert.False(serverThread.IsAlive);
+        Assert.True(threadDict[threadId].QueueIsEmpty);
+        Assert.False(threadDict[threadId].IsAlive);
     }
 
     [Fact]
     public void ServerThreadCanWorkWithExceptionCommands()
     {
         var threadId = 3;
-        var serverThread = IoC.Resolve<ServerThread>(
-            "Thread.Create&Start", threadId, () => { _newScope.Execute(); });
+        IoC.Resolve<ServerThread>("Thread.Create&Start", threadId, () => { _newScope.Execute(); });
 
+        var threadDict = IoC.Resolve<ThreadDict>("Thread.GetThreadDict");
         var senderDict = IoC.Resolve<QueueDict>("Thread.GetSenderDict");
 
         var usualCommand = new Mock<ICommand>();
@@ -163,7 +163,7 @@ public class ServerThreadTest
 
         senderDict[threadId].Add(exceptionCommand.Object);
 
-        senderDict[threadId].Add(IoC.Resolve<ICommand>("Thread.HardStop", serverThread, () => { mre.Set(); }));
+        senderDict[threadId].Add(IoC.Resolve<ICommand>("Thread.HardStop", threadDict[threadId], () => { mre.Set(); }));
 
         senderDict[threadId].Add(usualCommand.Object);
 
@@ -173,6 +173,6 @@ public class ServerThreadTest
         exceptionCommand.Verify(cmd => cmd.Execute(), Times.Once());
 
         Assert.Single(senderDict[threadId]);
-        Assert.False(serverThread.IsAlive);
+        Assert.False(threadDict[threadId].IsAlive);
     }
 }
