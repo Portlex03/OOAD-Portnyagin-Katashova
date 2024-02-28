@@ -53,7 +53,7 @@ public class ServerThreadTest
             }
         ).Execute();
 
-        // стратегия получения HardStopCommand
+        // стратегия получения HardStopCommand 
         IoC.Resolve<ICommand>(
             "IoC.Register", "Thread.HardStop",
             (object[] args) =>
