@@ -17,15 +17,10 @@ public class SoftStopCommand : ICommand
         var oldBehaviour = _t.GetBehaviour();
         void newBehaviour()
         {
-            if (_t.QueueIsEmpty)
-            {
-                _t.Stop();
-                _action();
-            }
-            else
-            {
+            if (!_t.QueueIsEmpty)
                 oldBehaviour();
-            }
+            else
+                IoC.Resolve<ICommand>("Thread.HardStop", _t, _action).Execute();
         }
         _t.UpdateBehaviour(newBehaviour);
     }
