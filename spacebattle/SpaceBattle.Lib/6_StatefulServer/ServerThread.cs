@@ -19,7 +19,7 @@ public class ServerThread
             try {
                 cmd.Execute();
             } catch (Exception e) {
-                IoC.Resolve<ICommand>("Exception.Handle", cmd, e).Execute();
+                IoC.Resolve<ICommand>("Exception.Handler", cmd, e).Execute();
             }
         };
 
