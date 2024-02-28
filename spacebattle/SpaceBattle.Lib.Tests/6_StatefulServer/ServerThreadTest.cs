@@ -102,51 +102,36 @@ public class ServerThreadTest
         Assert.False(serverThread.IsAlive);
     }
 
-    // [Fact]
-    // public void SoftStopMustStopServerThread()
-    // {
-    //     var threadId = 2;
-    //     var serverThread = IoC.Resolve<ServerThread>("Thread.Create&Start", threadId, () => { _newScope.Execute(); });
+    [Fact]
+    public void SoftStopMustStopServerThread()
+    {
+        var threadId = 2;
+        var serverThread = IoC.Resolve<ServerThread>(
+            "Thread.Create&Start", threadId, () => { _newScope.Execute(); });
 
-    //     var senderDict = IoC.Resolve<QueueDict>("Thread.GetSenderDict");
+        var senderDict = IoC.Resolve<QueueDict>("Thread.GetSenderDict");
 
-    //     // var usualCommand = new Mock<ICommand>();
-    //     // usualCommand.Setup(cmd => cmd.Execute()).Verifiable();
+        var usualCommand = new Mock<ICommand>();
+        usualCommand.Setup(cmd => cmd.Execute()).Verifiable();
 
-    //     var mre = new ManualResetEvent(false);
+        var mre = new ManualResetEvent(false);
 
-    //     senderDict[threadId].Add(_newScope);
+        senderDict[threadId].Add(usualCommand.Object);
 
-    //     senderDict[threadId].Add(
-    //         IoC.Resolve<ICommand>(
-    //             "IoC.Register", "Thread.HardStop",
-    //             (object[] args) =>
-    //             {
-    //                 return new ActionCommand(() =>
-    //                 {
-    //                     new HardStopCommand((ServerThread)args[0]).Execute();
-    //                     new ActionCommand((Action)args[1]).Execute();
-    //                 });
-    //             }
-    //         )
-    //     );
+        senderDict[threadId].Add(usualCommand.Object);
 
-    //     // senderDict[threadId].Add(usualCommand.Object);
+        senderDict[threadId].Add(IoC.Resolve<ICommand>("Thread.SoftStop", serverThread, () => { mre.Set(); }));
 
-    //     // senderDict[threadId].Add(usualCommand.Object);
+        senderDict[threadId].Add(usualCommand.Object);
 
-    //     senderDict[threadId].Add(IoC.Resolve<ICommand>("Thread.SoftStop", serverThread, () => { mre.Set(); }));
+        senderDict[threadId].Add(usualCommand.Object);
 
-    //     // senderDict[threadId].Add(usualCommand.Object);
+        mre.WaitOne();
 
-    //     // senderDict[threadId].Add(usualCommand.Object);
-
-    //     mre.WaitOne();
-
-    //     // usualCommand.Verify(cmd => cmd.Execute(), Times.Exactly(4));
-    //     Assert.True(serverThread.QueueIsEmpty);
-    //     Assert.False(serverThread.IsAlive);
-    // }
+        usualCommand.Verify(cmd => cmd.Execute(), Times.Exactly(4));
+        Assert.True(serverThread.QueueIsEmpty);
+        Assert.False(serverThread.IsAlive);
+    }
 
     [Fact]
     public void ServerThreadCanWorkWithExceptionCommands()
