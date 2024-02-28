@@ -19,16 +19,10 @@ public class ServerThreadTest
             "IoC.Register", "Thread.HardStop",
             (object[] args) => {
                 return new ActionCommand(() => {
-                    ((ICommand)args[0]).Execute();
+                    new HardStopCommand((ServerThread)args[0]).Execute();
                     new ActionCommand((Action)args[1]).Execute();
                 });
             }
-        ).Execute();
-
-        var exceptionHandler = new Mock<ICommand>();
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "Exception.Handle",
-            (object[] args) => exceptionHandler.Object
         ).Execute();
     }
 
@@ -37,15 +31,13 @@ public class ServerThreadTest
     {
         var q = new BlockingCollection<ICommand>(100);
         var st = new ServerThread(q);
-
         var mre = new ManualResetEvent(false);
-        var hs = new HardStopCommand(st);
 
         q.Add(new EmptyCommand());
 
         q.Add(new ActionCommand(() => { Thread.Sleep(1000); } ));
 
-        q.Add(IoC.Resolve<ICommand>("Thread.HardStop", hs, () => { mre.Set(); }));
+        q.Add(IoC.Resolve<ICommand>("Thread.HardStop", st, () => { mre.Set(); }));
 
         q.Add(new EmptyCommand());
 
@@ -87,15 +79,28 @@ public class ServerThreadTest
     {
         var q = new BlockingCollection<ICommand>(100);
         var st = new ServerThread(q);
-
         var mre = new ManualResetEvent(false);
-        var hs = new HardStopCommand(st);
+
+        q.Add(
+            IoC.Resolve<ICommand>(
+                "Scopes.Current.Set",
+                IoC.Resolve<object>("Scopes.New", IoC.Resolve<object>("Scopes.Root"))
+            )
+        );
+
+        var exceptionHandler = new Mock<ICommand>();
+        q.Add(
+            IoC.Resolve<ICommand>(
+            "IoC.Register", "Exception.Handle",
+            (object[] args) => exceptionHandler.Object
+            )
+        );
 
         q.Add(new ActionCommand(() => { Thread.Sleep(1000); } ));
 
         q.Add(new ActionCommand(() => { throw new Exception(); }));
 
-        q.Add(IoC.Resolve<ICommand>("Thread.HardStop", hs, () => { mre.Set(); }));
+        q.Add(IoC.Resolve<ICommand>("Thread.HardStop", st, () => { mre.Set(); }));
 
         q.Add(new ActionCommand(() => { Thread.Sleep(1000); } ));
 
