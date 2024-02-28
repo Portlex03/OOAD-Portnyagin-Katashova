@@ -34,7 +34,7 @@ public class ServerThread
         });
     }
     public bool QueueIsEmpty { get => _q.Count == 0; }
-    public bool IsAlive { get => _t.IsAlive; }
+    public bool IsAlive { get => _stop == false; }
 
     public void Start() => _t.Start();
 
