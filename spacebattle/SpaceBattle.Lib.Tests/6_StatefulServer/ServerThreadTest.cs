@@ -58,11 +58,12 @@ public class ServerThreadTest
             "IoC.Register", "Thread.HardStop",
             (object[] args) =>
             {
-                return new ActionCommand(() =>
+                List<ICommand> cmdList = new()
                 {
-                    new HardStopCommand((ServerThread)args[0]).Execute();
-                    new ActionCommand((Action)args[1]).Execute();
-                });
+                    new HardStopCommand((ServerThread)args[0]),
+                    new ActionCommand((Action)args[1])
+                };
+                return new MacroCommand(cmdList);
             }
         ).Execute();
 
