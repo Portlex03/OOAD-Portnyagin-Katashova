@@ -4,8 +4,8 @@ using Hwdtech;
 
 public class SoftStopCommand : ICommand
 {
-    ServerThread _t;
-    Action _action;
+    private readonly ServerThread _t;
+    private readonly Action _action;
     public SoftStopCommand(ServerThread t, Action action)
     {
         _t = t;
@@ -15,6 +15,7 @@ public class SoftStopCommand : ICommand
     public void Execute()
     {
         var oldBehaviour = _t.GetBehaviour();
+
         void newBehaviour()
         {
             if (!_t.QueueIsEmpty)
@@ -22,6 +23,7 @@ public class SoftStopCommand : ICommand
             else
                 IoC.Resolve<ICommand>("Thread.HardStop", _t, _action).Execute();
         }
+        
         _t.UpdateBehaviour(newBehaviour);
     }
 }

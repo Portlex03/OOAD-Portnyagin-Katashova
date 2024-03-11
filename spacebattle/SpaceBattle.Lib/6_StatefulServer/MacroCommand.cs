@@ -3,7 +3,7 @@ using Hwdtech;
 
 public class MacroCommand : ICommand
 {
-    IEnumerable<ICommand> _cmdList;
+    private readonly IEnumerable<ICommand> _cmdList;
     public MacroCommand(IEnumerable<ICommand> cmdList) => _cmdList = cmdList;
     public void Execute() => _cmdList.ToList().ForEach(cmd => cmd.Execute());
 }

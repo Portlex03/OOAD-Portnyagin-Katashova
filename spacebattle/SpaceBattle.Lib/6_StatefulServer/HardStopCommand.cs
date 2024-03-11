@@ -3,9 +3,19 @@ using Hwdtech;
 
 public class HardStopCommand : ICommand
 {
-    ServerThread _t;
+    private readonly ServerThread _t;
 
     public HardStopCommand(ServerThread t) => _t = t;
 
-    public void Execute() => _t.Stop();
+    public void Execute()
+    {
+        if (_t.Equals(Thread.CurrentThread))
+        {
+            _t.Stop();
+        }
+        else
+        {
+            throw new Exception("Hard stop executed in incorrect thread");
+        }
+    }
 }

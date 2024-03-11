@@ -5,10 +5,10 @@ using Hwdtech;
 
 public class ServerThread
 {
-    BlockingCollection<ICommand> _q;
-    Action _behaviour;
-    Thread _t;
-    bool _stop = false;
+    private readonly BlockingCollection<ICommand> _q;
+    private Action _behaviour;
+    private readonly Thread _t;
+    private bool _stop = false;
 
     public ServerThread(BlockingCollection<ICommand> q)
     {
@@ -38,9 +38,19 @@ public class ServerThread
 
     public void Start() => _t.Start();
 
-    public void Stop() => _stop = true;
+    internal void Stop() => _stop = true;
 
     public Action GetBehaviour() => _behaviour;
 
-    public void UpdateBehaviour(Action newBehaviour) => _behaviour = newBehaviour;
+    internal void UpdateBehaviour(Action newBehaviour) => _behaviour = newBehaviour;
+    
+    public override bool Equals(object? obj)
+    {
+        return obj != null && GetType() == obj.GetType() && obj is Thread thread && _t == thread;
+    }
+
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
+    }
 }
