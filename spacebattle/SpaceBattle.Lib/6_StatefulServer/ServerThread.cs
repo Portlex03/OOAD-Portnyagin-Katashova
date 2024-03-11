@@ -17,6 +17,7 @@ public class ServerThread
         _behaviour = () =>
         {
             var cmd = q.Take();
+            // cmd.Execute();
             try
             {
                 cmd.Execute();
@@ -46,7 +47,7 @@ public class ServerThread
     
     public override bool Equals(object? obj)
     {
-        return obj != null && GetType() == obj.GetType() && obj is Thread thread && _t == thread;
+        return obj != null && obj is Thread thread && _t == thread;
     }
 
     public override int GetHashCode()
