@@ -17,7 +17,6 @@ public class ServerThread
         _behaviour = () =>
         {
             var cmd = q.Take();
-            // cmd.Execute();
             try
             {
                 cmd.Execute();
@@ -35,6 +34,7 @@ public class ServerThread
         });
     }
     public bool QueueIsEmpty { get => _q.Count == 0; }
+
     public bool IsAlive { get => _stop == false; }
 
     public void Start() => _t.Start();
