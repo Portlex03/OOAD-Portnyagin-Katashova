@@ -1,16 +1,15 @@
 namespace SpaceBattle.Lib.Tests;
-
-using System.Collections.Concurrent;
-using Hwdtech;
 using QueueDict = Dictionary<int, System.Collections.Concurrent.BlockingCollection<Hwdtech.ICommand>>;
 using ThreadDict = Dictionary<int, ServerThread>;
+using System.Collections.Concurrent;
 using Hwdtech.Ioc;
+using Hwdtech;
 using Moq;
 
-public class ServerThreadTest
+public class SoftStopTest
 {
-    ICommand _newScope;
-    public ServerThreadTest()
+    private readonly ICommand _newScope;
+    public SoftStopTest()
     {
         new InitScopeBasedIoCImplementationCommand().Execute();
 
@@ -66,13 +65,19 @@ public class ServerThreadTest
                 return new MacroCommand(cmdList);
             }
         ).Execute();
+
+        // Стратегия получения SoftStopCommand
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "Thread.SoftStop",
+            (object[] args) => new SoftStopCommand((ServerThread)args[0], (Action)args[1])
+        ).Execute();
     }
 
     [Fact]
-    public void ServerThread_Can_Work_With_ExceptionCommands()
+    public void Successful_SoftStop_ServerThread()
     {
         // id потока
-        var threadId = 3;
+        var threadId = 2;
 
         // создание и запуск сервера с id = 2
         IoC.Resolve<ServerThread>("Thread.Create&Start", threadId, () => { _newScope.Execute(); });
@@ -87,56 +92,38 @@ public class ServerThreadTest
         var usualCommand = new Mock<ICommand>();
         usualCommand.Setup(cmd => cmd.Execute()).Verifiable();
 
-        // создание команды с ошибкой
-        var exceptionCommand = new Mock<ICommand>();
-        exceptionCommand.Setup(cmd => cmd.Execute()).Throws<Exception>().Verifiable();
-
         // создание синхронизатора потока
         var mre = new ManualResetEvent(false);
 
-        // создание команды, обрабатывающей исключения
-        var exceptionHandler = new Mock<ICommand>();
-
-        // регистрация обработчика ошибок в поток
-        senderDict[threadId].Add(
-            IoC.Resolve<ICommand>(
-                "IoC.Register", 
-                "Exception.Handler",
-                (object[] args) => exceptionHandler.Object
-            )
-        );
-
-        // добавление обычной команды
+        // отправка 2 обычных команд в очередь
         senderDict[threadId].Add(usualCommand.Object);
 
-        // добавление команды с исключением
-        senderDict[threadId].Add(exceptionCommand.Object);
+        senderDict[threadId].Add(usualCommand.Object);
 
-        // добавление команды остановки потока
+        // отправка команды остановки сервера
         senderDict[threadId].Add(
             IoC.Resolve<ICommand>(
-                "Thread.HardStop", 
+                "Thread.SoftStop", 
                 threadDict[threadId], 
                 () => { mre.Set(); }
             )
         );
 
-        // добавление обычной команды
+        // отправка 2 обычных команд в очередь
+        senderDict[threadId].Add(usualCommand.Object);
+
         senderDict[threadId].Add(usualCommand.Object);
 
         // закрытие калитки
         mre.WaitOne();
 
-        // проверка на то, что исполнилась обычная команда
-        usualCommand.Verify(cmd => cmd.Execute(), Times.Once());
+        // проверка на то, что обычная команда исполнилась все 4 раза
+        usualCommand.Verify(cmd => cmd.Execute(), Times.Exactly(4));
         
-        // проверка на то, что исполнилась команда с исключением
-        exceptionCommand.Verify(cmd => cmd.Execute(), Times.Once());
-
-        // проверка на то, что в очереди осталась обычная команда
-        Assert.Single(senderDict[threadId]);
+        // проверка на то, что очередь пустая
+        Assert.True(threadDict[threadId].QueueIsEmpty);
         
-        // проверка на то, что сервер остановился
+        // проверка на то, что поток остановлен
         Assert.False(threadDict[threadId].IsAlive);
     }
 }
