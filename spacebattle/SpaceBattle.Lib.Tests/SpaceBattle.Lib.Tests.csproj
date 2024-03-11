@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SpaceBattle.Lib\SpaceBattle.Lib.csproj" />
+    <ProjectReference Include="..\ConsoleApplication\ConsoleApplication.csproj" />
   </ItemGroup>
 
 </Project>
