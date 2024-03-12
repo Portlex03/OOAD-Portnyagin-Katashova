@@ -140,5 +140,17 @@ public class HardStopTest
 
         // проверка на то, что сервер работает
         Assert.True(threadDict[threadId].IsAlive);
+
+        // получение словаря с очередями
+        var senderDict = IoC.Resolve<QueueDict>("Thread.GetSenderDict");
+
+        // отправка команды остановки сервера
+        senderDict[threadId].Add(
+            IoC.Resolve<ICommand>(
+                "Thread.HardStop",
+                threadDict[threadId],
+                () => { }
+            )
+        );
     }
 }
