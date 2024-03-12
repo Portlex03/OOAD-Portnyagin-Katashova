@@ -9,7 +9,7 @@ using Moq;
 
 public class ServerThreadTest
 {
-    ICommand _newScope;
+    private readonly ICommand _newScope;
     public ServerThreadTest()
     {
         new InitScopeBasedIoCImplementationCommand().Execute();
@@ -79,7 +79,7 @@ public class ServerThreadTest
 
         // получение словаря с потоками
         var threadDict = IoC.Resolve<ThreadDict>("Thread.GetThreadDict");
-        
+
         // получение словаря с очередями
         var senderDict = IoC.Resolve<QueueDict>("Thread.GetSenderDict");
 
@@ -100,7 +100,7 @@ public class ServerThreadTest
         // регистрация обработчика ошибок в поток
         senderDict[threadId].Add(
             IoC.Resolve<ICommand>(
-                "IoC.Register", 
+                "IoC.Register",
                 "Exception.Handler",
                 (object[] args) => exceptionHandler.Object
             )
@@ -115,8 +115,8 @@ public class ServerThreadTest
         // добавление команды остановки потока
         senderDict[threadId].Add(
             IoC.Resolve<ICommand>(
-                "Thread.HardStop", 
-                threadDict[threadId], 
+                "Thread.HardStop",
+                threadDict[threadId],
                 () => { mre.Set(); }
             )
         );
@@ -129,13 +129,13 @@ public class ServerThreadTest
 
         // проверка на то, что исполнилась обычная команда
         usualCommand.Verify(cmd => cmd.Execute(), Times.Once());
-        
+
         // проверка на то, что исполнилась команда с исключением
         exceptionCommand.Verify(cmd => cmd.Execute(), Times.Once());
 
         // проверка на то, что в очереди осталась обычная команда
         Assert.Single(senderDict[threadId]);
-        
+
         // проверка на то, что сервер остановился
         Assert.False(threadDict[threadId].IsAlive);
     }

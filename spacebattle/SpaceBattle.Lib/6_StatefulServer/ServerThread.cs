@@ -44,7 +44,7 @@ public class ServerThread
     public Action GetBehaviour() => _behaviour;
 
     internal void UpdateBehaviour(Action newBehaviour) => _behaviour = newBehaviour;
-    
+
     public override bool Equals(object? obj)
     {
         return obj != null && obj is Thread thread && _t == thread;

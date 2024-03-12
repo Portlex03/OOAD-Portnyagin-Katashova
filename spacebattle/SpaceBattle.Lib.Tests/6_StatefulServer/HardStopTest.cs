@@ -79,7 +79,7 @@ public class HardStopTest
 
         // получение словаря с потоками
         var threadDict = IoC.Resolve<ThreadDict>("Thread.GetThreadDict");
-        
+
         // получение словаря с очередями
         var senderDict = IoC.Resolve<QueueDict>("Thread.GetSenderDict");
 
@@ -87,7 +87,7 @@ public class HardStopTest
         var usualCommand = new Mock<ICommand>();
         usualCommand.Setup(cmd => cmd.Execute()).Verifiable();
 
-        // создаём синхронизатор потока
+        // создание синхронизатора потока
         var mre = new ManualResetEvent(false);
 
         // отправка 2 обыных команд в очередь
@@ -112,7 +112,7 @@ public class HardStopTest
 
         // проверка на то, что обычная команда исполнилась 2 раза
         usualCommand.Verify(cmd => cmd.Execute(), Times.Exactly(2));
-        
+
         // проверка на то, что в очереди осталась одна команда
         Assert.Single(senderDict[threadId]);
 
@@ -120,9 +120,25 @@ public class HardStopTest
         Assert.False(threadDict[threadId].IsAlive);
     }
 
-    // [Fact]
-    // public void HardStop_Incorrect_ServerThread_With_Exception()
-    // {
+    [Fact]
+    public void HardStop_Incorrect_ServerThread_With_Exception()
+    {
+        // id потока
+        int threadId = 2;
 
-    // }
+        // создание и запуск сервера с id = 2
+        IoC.Resolve<ServerThread>("Thread.Create&Start", threadId, () => { _newScope.Execute(); });
+
+        // получение словаря с потоками
+        var threadDict = IoC.Resolve<ThreadDict>("Thread.GetThreadDict");
+
+        // создание команды остановки потока
+        var hardStopCmd = new HardStopCommand(threadDict[threadId]);
+
+        // попытка остановить сервер не в его потоке
+        Assert.Throws<Exception>(hardStopCmd.Execute);
+
+        // проверка на то, что сервер работает
+        Assert.True(threadDict[threadId].IsAlive);
+    }
 }

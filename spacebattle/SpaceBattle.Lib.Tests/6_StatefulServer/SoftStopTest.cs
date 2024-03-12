@@ -77,14 +77,14 @@ public class SoftStopTest
     public void Successful_SoftStop_ServerThread()
     {
         // id потока
-        var threadId = 2;
+        var threadId = 3;
 
-        // создание и запуск сервера с id = 2
+        // создание и запуск сервера с id = 3
         IoC.Resolve<ServerThread>("Thread.Create&Start", threadId, () => { _newScope.Execute(); });
 
         // получение словаря с потоками
         var threadDict = IoC.Resolve<ThreadDict>("Thread.GetThreadDict");
-        
+
         // получение словаря с очередями
         var senderDict = IoC.Resolve<QueueDict>("Thread.GetSenderDict");
 
@@ -103,8 +103,8 @@ public class SoftStopTest
         // отправка команды остановки сервера
         senderDict[threadId].Add(
             IoC.Resolve<ICommand>(
-                "Thread.SoftStop", 
-                threadDict[threadId], 
+                "Thread.SoftStop",
+                threadDict[threadId],
                 () => { mre.Set(); }
             )
         );
@@ -119,11 +119,33 @@ public class SoftStopTest
 
         // проверка на то, что обычная команда исполнилась все 4 раза
         usualCommand.Verify(cmd => cmd.Execute(), Times.Exactly(4));
-        
+
         // проверка на то, что очередь пустая
         Assert.True(threadDict[threadId].QueueIsEmpty);
-        
+
         // проверка на то, что поток остановлен
         Assert.False(threadDict[threadId].IsAlive);
+    }
+
+    [Fact]
+    public void SoftStop_ServerThread_In_Another_Thread_With_Exception()
+    {
+        // id потока
+        int threadId = 4;
+
+        // создание и запуск сервера с id = 4
+        IoC.Resolve<ServerThread>("Thread.Create&Start", threadId, () => { _newScope.Execute(); });
+
+        // получение словаря с потоками
+        var threadDict = IoC.Resolve<ThreadDict>("Thread.GetThreadDict");
+
+        // создание команды остановки потока
+        var softStopCmd = new SoftStopCommand(threadDict[threadId], () => { });
+
+        // попытка остановить сервер не в его потоке
+        Assert.Throws<Exception>(softStopCmd.Execute);
+
+        // проверка на то, что сервер работает
+        Assert.True(threadDict[threadId].IsAlive);
     }
 }

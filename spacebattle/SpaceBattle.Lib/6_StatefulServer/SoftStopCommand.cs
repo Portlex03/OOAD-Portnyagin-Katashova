@@ -14,6 +14,9 @@ public class SoftStopCommand : ICommand
 
     public void Execute()
     {
+        if (!_t.Equals(Thread.CurrentThread))
+            throw new Exception();
+
         var oldBehaviour = _t.GetBehaviour();
 
         void newBehaviour()
@@ -23,7 +26,7 @@ public class SoftStopCommand : ICommand
             else
                 IoC.Resolve<ICommand>("Thread.HardStop", _t, _action).Execute();
         }
-        
+
         _t.UpdateBehaviour(newBehaviour);
     }
 }
