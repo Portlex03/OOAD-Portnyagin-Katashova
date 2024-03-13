@@ -62,7 +62,7 @@ public class HardStopTest
 
                 if (args.Length > 1)
                     cmdList.Add(new ActionCommand((Action)args[1]));
-                
+
                 return new MacroCommand(cmdList);
             }
         ).Execute();

@@ -7,7 +7,7 @@ public class SendCommand : ICommand
 {
     private readonly BlockingCollection<ICommand> _q;
     private readonly ICommand _cmd;
-    
+
     public SendCommand(BlockingCollection<ICommand> q, ICommand cmd)
     {
         _q = q;

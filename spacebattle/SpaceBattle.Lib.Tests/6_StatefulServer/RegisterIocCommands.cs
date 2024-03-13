@@ -1,9 +1,9 @@
-namespace SpaceBattle.Lib.Tests;
+// namespace SpaceBattle.Lib.Tests;
 
-using System.Collections.Concurrent;
-using Hwdtech;
+// using System.Collections.Concurrent;
+// using Hwdtech;
 
-using QueueDict = Dictionary<int, System.Collections.Concurrent.BlockingCollection<Hwdtech.ICommand>>;
-using ThreadDict = Dictionary<int, ServerThread>;
+// using QueueDict = Dictionary<int, System.Collections.Concurrent.BlockingCollection<Hwdtech.ICommand>>;
+// using ThreadDict = Dictionary<int, ServerThread>;
 
 

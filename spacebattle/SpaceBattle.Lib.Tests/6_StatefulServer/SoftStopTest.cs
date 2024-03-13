@@ -62,7 +62,7 @@ public class SoftStopTest
 
                 if (args.Length > 1)
                     cmdList.Add(new ActionCommand((Action)args[1]));
-                
+
                 return new MacroCommand(cmdList);
             }
         ).Execute();
@@ -98,7 +98,7 @@ public class SoftStopTest
         IoC.Resolve<ICommand>("Thread.SendCommand", threadId, usualCommand.Object).Execute();
 
         IoC.Resolve<ICommand>(
-            "Thread.SendCommand", threadId, 
+            "Thread.SendCommand", threadId,
             IoC.Resolve<ICommand>(
                 "Thread.SoftStop",
                 serverThread,
@@ -130,8 +130,8 @@ public class SoftStopTest
         Assert.Throws<Exception>(softStopCmd.Execute);
 
         IoC.Resolve<ICommand>(
-            "Thread.SendCommand", 
-            threadId, 
+            "Thread.SendCommand",
+            threadId,
             IoC.Resolve<ICommand>("Thread.SoftStop", serverThread)
         ).Execute();
     }
