@@ -6,11 +6,14 @@ public class SoftStopCommand : ICommand
 {
     private readonly ServerThread _t;
     private readonly Action _action;
-    public SoftStopCommand(ServerThread t, Action action)
+
+    public SoftStopCommand(ServerThread t, Action? action = null)
     {
         _t = t;
-        _action = action;
+        _action = action ?? EmptyAction;
     }
+
+    private void EmptyAction() { }
 
     public void Execute()
     {

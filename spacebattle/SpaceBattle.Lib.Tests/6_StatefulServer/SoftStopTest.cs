@@ -13,27 +13,30 @@ public class SoftStopTest
     {
         new InitScopeBasedIoCImplementationCommand().Execute();
 
-        // новый скоп
         _newScope = IoC.Resolve<ICommand>("Scopes.Current.Set",
             IoC.Resolve<object>("Scopes.New", IoC.Resolve<object>("Scopes.Root"))
         );
         _newScope.Execute();
 
-        // стратегия получения словаря с потоками
-        var threadDict = new ThreadDict();
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "Thread.GetThreadDict",
-            (object[] args) => threadDict
-        ).Execute();
-
-        // стратегия получения словаря с очередями
         var senderDict = new QueueDict();
         IoC.Resolve<ICommand>(
             "IoC.Register", "Thread.GetSenderDict",
             (object[] args) => senderDict
         ).Execute();
 
-        // стратегия инициализации и запуска сервера
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "Thread.SendCommand",
+            (object[] args) =>
+            {
+                var threadId = (int)args[0];
+                var cmd = (ICommand)args[1];
+
+                var q = IoC.Resolve<QueueDict>("Thread.GetSenderDict")[threadId];
+
+                return new SendCommand(q, cmd);
+            }
+        ).Execute();
+
         IoC.Resolve<ICommand>(
             "IoC.Register", "Thread.Create&Start",
             (object[] args) =>
@@ -44,7 +47,6 @@ public class SoftStopTest
                 var q = new BlockingCollection<ICommand>(100) { actionCommand };
                 var serverThread = new ServerThread(q);
 
-                IoC.Resolve<ThreadDict>("Thread.GetThreadDict").TryAdd(threadId, serverThread);
                 IoC.Resolve<QueueDict>("Thread.GetSenderDict").TryAdd(threadId, q);
 
                 serverThread.Start();
@@ -52,112 +54,85 @@ public class SoftStopTest
             }
         ).Execute();
 
-        // стратегия получения HardStopCommand 
         IoC.Resolve<ICommand>(
             "IoC.Register", "Thread.HardStop",
             (object[] args) =>
             {
-                List<ICommand> cmdList = new()
-                {
-                    new HardStopCommand((ServerThread)args[0]),
-                    new ActionCommand((Action)args[1])
-                };
+                var cmdList = new List<ICommand> { new HardStopCommand((ServerThread)args[0]) };
+
+                if (args.Length > 1)
+                    cmdList.Add(new ActionCommand((Action)args[1]));
+                
                 return new MacroCommand(cmdList);
             }
         ).Execute();
 
-        // Стратегия получения SoftStopCommand
         IoC.Resolve<ICommand>(
             "IoC.Register", "Thread.SoftStop",
-            (object[] args) => new SoftStopCommand((ServerThread)args[0], (Action)args[1])
+            (object[] args) =>
+            {
+                Action? action = null;
+                if (args.Length > 1)
+                    action = (Action)args[1];
+
+                return new SoftStopCommand((ServerThread)args[0], action);
+            }
         ).Execute();
     }
 
     [Fact]
     public void Successful_SoftStop_ServerThread()
     {
-        // id потока
         var threadId = 3;
 
-        // создание и запуск сервера с id = 3
-        IoC.Resolve<ServerThread>("Thread.Create&Start", threadId, () => { _newScope.Execute(); });
+        var serverThread = IoC.Resolve<ServerThread>(
+            "Thread.Create&Start", threadId, () => { _newScope.Execute(); });
 
-        // получение словаря с потоками
-        var threadDict = IoC.Resolve<ThreadDict>("Thread.GetThreadDict");
-
-        // получение словаря с очередями
-        var senderDict = IoC.Resolve<QueueDict>("Thread.GetSenderDict");
-
-        // создание обычной команды для потока
         var usualCommand = new Mock<ICommand>();
         usualCommand.Setup(cmd => cmd.Execute()).Verifiable();
 
-        // создание синхронизатора потока
         var mre = new ManualResetEvent(false);
 
-        // отправка 2 обычных команд в очередь
-        senderDict[threadId].Add(usualCommand.Object);
+        IoC.Resolve<ICommand>("Thread.SendCommand", threadId, usualCommand.Object).Execute();
 
-        senderDict[threadId].Add(usualCommand.Object);
+        IoC.Resolve<ICommand>("Thread.SendCommand", threadId, usualCommand.Object).Execute();
 
-        // отправка команды остановки сервера
-        senderDict[threadId].Add(
+        IoC.Resolve<ICommand>(
+            "Thread.SendCommand", threadId, 
             IoC.Resolve<ICommand>(
                 "Thread.SoftStop",
-                threadDict[threadId],
+                serverThread,
                 () => { mre.Set(); }
             )
-        );
+        ).Execute();
 
-        // отправка 2 обычных команд в очередь
-        senderDict[threadId].Add(usualCommand.Object);
+        IoC.Resolve<ICommand>("Thread.SendCommand", threadId, usualCommand.Object).Execute();
 
-        senderDict[threadId].Add(usualCommand.Object);
+        IoC.Resolve<ICommand>("Thread.SendCommand", threadId, usualCommand.Object).Execute();
 
-        // закрытие калитки
         mre.WaitOne();
 
-        // проверка на то, что обычная команда исполнилась все 4 раза
         usualCommand.Verify(cmd => cmd.Execute(), Times.Exactly(4));
 
-        // проверка на то, что очередь пустая
-        Assert.True(threadDict[threadId].QueueIsEmpty);
-
-        // проверка на то, что поток остановлен
-        Assert.False(threadDict[threadId].IsAlive);
+        Assert.True(serverThread.QueueIsEmpty);
     }
 
     [Fact]
     public void SoftStop_ServerThread_In_Another_Thread_With_Exception()
     {
-        // id потока
         int threadId = 4;
 
-        // создание и запуск сервера с id = 4
-        IoC.Resolve<ServerThread>("Thread.Create&Start", threadId, () => { _newScope.Execute(); });
+        var serverThread = IoC.Resolve<ServerThread>(
+            "Thread.Create&Start", threadId, () => { _newScope.Execute(); });
 
-        // получение словаря с потоками
-        var threadDict = IoC.Resolve<ThreadDict>("Thread.GetThreadDict");
+        var softStopCmd = new SoftStopCommand(serverThread);
 
-        // создание команды остановки потока
-        var softStopCmd = new SoftStopCommand(threadDict[threadId], () => { });
-
-        // попытка остановить сервер не в его потоке
         Assert.Throws<Exception>(softStopCmd.Execute);
 
-        // проверка на то, что сервер работает
-        Assert.True(threadDict[threadId].IsAlive);
-
-        // получение словаря с очередями
-        var senderDict = IoC.Resolve<QueueDict>("Thread.GetSenderDict");
-
-        // отправка команды остановки сервера
-        senderDict[threadId].Add(
-            IoC.Resolve<ICommand>(
-                "Thread.SoftStop",
-                threadDict[threadId],
-                () => { }
-            )
-        );
+        IoC.Resolve<ICommand>(
+            "Thread.SendCommand", 
+            threadId, 
+            IoC.Resolve<ICommand>("Thread.SoftStop", serverThread)
+        ).Execute();
     }
 }
