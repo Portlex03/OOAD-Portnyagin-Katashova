@@ -1,7 +1,5 @@
 namespace SpaceBattle.Lib.Tests;
-using QueueDict = Dictionary<int, System.Collections.Concurrent.BlockingCollection<Hwdtech.ICommand>>;
-using ThreadDict = Dictionary<int, ServerThread>;
-using System.Collections.Concurrent;
+
 using Hwdtech.Ioc;
 using Hwdtech;
 using Moq;
@@ -13,71 +11,18 @@ public class SoftStopTest
     {
         new InitScopeBasedIoCImplementationCommand().Execute();
 
-        _newScope = IoC.Resolve<ICommand>("Scopes.Current.Set",
-            IoC.Resolve<object>("Scopes.New", IoC.Resolve<object>("Scopes.Root"))
-        );
+        _newScope = (ICommand)new RegisterIoCScope().RunStrategy();
         _newScope.Execute();
 
-        var senderDict = new QueueDict();
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "Thread.GetSenderDict",
-            (object[] args) => senderDict
-        ).Execute();
+        ((ICommand)new RegisterGetThreadSenderDictCommand().RunStrategy()).Execute();
 
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "Thread.SendCommand",
-            (object[] args) =>
-            {
-                var threadId = (int)args[0];
-                var cmd = (ICommand)args[1];
+        ((ICommand)new RegisterSendCommand().RunStrategy()).Execute();
 
-                var q = IoC.Resolve<QueueDict>("Thread.GetSenderDict")[threadId];
+        ((ICommand)new RegisterServerThreadCreateAndStartCommand().RunStrategy()).Execute();
 
-                return new SendCommand(q, cmd);
-            }
-        ).Execute();
+        ((ICommand)new RegisterHardStopCommand().RunStrategy()).Execute();
 
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "Thread.Create&Start",
-            (object[] args) =>
-            {
-                var threadId = (int)args[0];
-                var actionCommand = new ActionCommand((Action)args[1]);
-
-                var q = new BlockingCollection<ICommand>(100) { actionCommand };
-                var serverThread = new ServerThread(q);
-
-                IoC.Resolve<QueueDict>("Thread.GetSenderDict").TryAdd(threadId, q);
-
-                serverThread.Start();
-                return serverThread;
-            }
-        ).Execute();
-
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "Thread.HardStop",
-            (object[] args) =>
-            {
-                var cmdList = new List<ICommand> { new HardStopCommand((ServerThread)args[0]) };
-
-                if (args.Length > 1)
-                    cmdList.Add(new ActionCommand((Action)args[1]));
-
-                return new MacroCommand(cmdList);
-            }
-        ).Execute();
-
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "Thread.SoftStop",
-            (object[] args) =>
-            {
-                Action? action = null;
-                if (args.Length > 1)
-                    action = (Action)args[1];
-
-                return new SoftStopCommand((ServerThread)args[0], action);
-            }
-        ).Execute();
+        ((ICommand)new RegisterSoftStopCommand().RunStrategy()).Execute();
     }
 
     [Fact]
@@ -129,10 +74,8 @@ public class SoftStopTest
 
         Assert.Throws<Exception>(softStopCmd.Execute);
 
-        IoC.Resolve<ICommand>(
-            "Thread.SendCommand",
-            threadId,
-            IoC.Resolve<ICommand>("Thread.SoftStop", serverThread)
-        ).Execute();
+        softStopCmd = IoC.Resolve<SoftStopCommand>("Thread.SoftStop", serverThread);
+
+        IoC.Resolve<ICommand>("Thread.SendCommand", threadId, softStopCmd).Execute();
     }
 }

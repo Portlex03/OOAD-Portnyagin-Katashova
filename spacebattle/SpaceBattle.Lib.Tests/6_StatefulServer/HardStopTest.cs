@@ -1,10 +1,9 @@
 namespace SpaceBattle.Lib.Tests;
-using QueueDict = Dictionary<int, System.Collections.Concurrent.BlockingCollection<Hwdtech.ICommand>>;
-using ThreadDict = Dictionary<int, ServerThread>;
-using System.Collections.Concurrent;
 using Hwdtech.Ioc;
 using Hwdtech;
 using Moq;
+
+using QueueDict = Dictionary<int, System.Collections.Concurrent.BlockingCollection<Hwdtech.ICommand>>;
 
 public class HardStopTest
 {
@@ -13,59 +12,16 @@ public class HardStopTest
     {
         new InitScopeBasedIoCImplementationCommand().Execute();
 
-        _newScope = IoC.Resolve<ICommand>("Scopes.Current.Set",
-            IoC.Resolve<object>("Scopes.New", IoC.Resolve<object>("Scopes.Root"))
-        );
+        _newScope = (ICommand)new RegisterIoCScope().RunStrategy();
         _newScope.Execute();
 
-        var senderDict = new QueueDict();
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "Thread.GetSenderDict",
-            (object[] args) => senderDict
-        ).Execute();
+        ((ICommand)new RegisterGetThreadSenderDictCommand().RunStrategy()).Execute();
 
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "Thread.SendCommand",
-            (object[] args) =>
-            {
-                var threadId = (int)args[0];
-                var cmd = (ICommand)args[1];
+        ((ICommand)new RegisterSendCommand().RunStrategy()).Execute();
 
-                var q = IoC.Resolve<QueueDict>("Thread.GetSenderDict")[threadId];
+        ((ICommand)new RegisterServerThreadCreateAndStartCommand().RunStrategy()).Execute();
 
-                return new SendCommand(q, cmd);
-            }
-        ).Execute();
-
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "Thread.Create&Start",
-            (object[] args) =>
-            {
-                var threadId = (int)args[0];
-                var actionCommand = new ActionCommand((Action)args[1]);
-
-                var q = new BlockingCollection<ICommand>(100) { actionCommand };
-                var serverThread = new ServerThread(q);
-
-                IoC.Resolve<QueueDict>("Thread.GetSenderDict").TryAdd(threadId, q);
-
-                serverThread.Start();
-                return serverThread;
-            }
-        ).Execute();
-
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "Thread.HardStop",
-            (object[] args) =>
-            {
-                var cmdList = new List<ICommand> { new HardStopCommand((ServerThread)args[0]) };
-
-                if (args.Length > 1)
-                    cmdList.Add(new ActionCommand((Action)args[1]));
-
-                return new MacroCommand(cmdList);
-            }
-        ).Execute();
+        ((ICommand)new RegisterHardStopCommand().RunStrategy()).Execute();
     }
 
     [Fact]
@@ -88,9 +44,7 @@ public class HardStopTest
         IoC.Resolve<ICommand>(
             "Thread.SendCommand", threadId,
              IoC.Resolve<ICommand>(
-                "Thread.HardStop",
-                serverThread,
-                () => { mre.Set(); }
+                "Thread.HardStop", serverThread, () => { mre.Set(); }
             )
         ).Execute();
 
@@ -117,10 +71,7 @@ public class HardStopTest
 
         IoC.Resolve<ICommand>(
             "Thread.SendCommand", threadId,
-             IoC.Resolve<ICommand>(
-                "Thread.HardStop",
-                serverThread
-            )
+             IoC.Resolve<ICommand>("Thread.HardStop", serverThread)
         ).Execute();
     }
 }

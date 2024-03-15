@@ -12,7 +12,7 @@ public class LongOperation : IStrategy
         _target = target;
     }
 
-    public object Execute(params object[] args)
+    public object RunStrategy(params object[] args)
     {
         var macroCommand = IoC.Resolve<ICommand>(
             "MacroCommand.Create", _cmdName, _target);

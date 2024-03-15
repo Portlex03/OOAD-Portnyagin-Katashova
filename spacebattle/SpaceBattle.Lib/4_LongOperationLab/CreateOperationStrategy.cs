@@ -6,7 +6,7 @@ public class CreateOperationStrategy : IStrategy
 
     public CreateOperationStrategy(string name) => _name = name;
 
-    public object Execute(params object[] args)
+    public object RunStrategy(params object[] args)
     {
         IUObject _obj = (IUObject)args[0];
         ICommand command = IoC.Resolve<ICommand>("Game.Command." + _name, _obj);

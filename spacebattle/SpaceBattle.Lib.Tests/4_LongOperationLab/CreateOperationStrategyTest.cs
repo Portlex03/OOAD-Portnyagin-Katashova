@@ -33,7 +33,7 @@ public class CreateOperationStrategyTest
         IoC.Resolve<ICommand>(
             "IoC.Register",
             "Game.Operation." + operationName,
-            (object[] args) => new CreateOperationStrategy(operationName).Execute(args)
+            (object[] args) => new CreateOperationStrategy(operationName).RunStrategy(args)
         ).Execute();
         IoC.Resolve<ICommand>("Game.Operation." + operationName, mockUObject.Object).Execute();
         mockCommand.VerifyAll();
