@@ -60,7 +60,11 @@ public class RegisterServerThreadCreateAndStartCommand : IStrategy
             (object[] args) =>
             {
                 var threadId = (int)args[0];
-                var actionCommand = new ActionCommand((Action)args[1]);
+
+                Action action = () => { };
+                if (args.Length > 1)
+                    action = (Action)args[1];
+                var actionCommand = new ActionCommand(action);
 
                 var q = new BlockingCollection<ICommand>(100) { actionCommand };
                 var serverThread = new ServerThread(q);
