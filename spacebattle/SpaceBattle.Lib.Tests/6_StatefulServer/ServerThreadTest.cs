@@ -18,6 +18,8 @@ public class ServerThreadTest
 
         ((ICommand)new RegisterGetThreadSenderDictCommand().Execute()).Execute();
 
+        ((ICommand)new RegisterGetThreadDictCommand().Execute()).Execute();
+
         ((ICommand)new RegisterSendCommand().Execute()).Execute();
 
         ((ICommand)new RegisterServerThreadCreateAndStartCommand().Execute()).Execute();
@@ -30,8 +32,11 @@ public class ServerThreadTest
     {
         var threadId = 3;
 
-        var serverThread = IoC.Resolve<ServerThread>(
-            "Thread.Create&Start", threadId, () => { _newScope.Execute(); });
+        IoC.Resolve<ICommand>(
+            "Thread.Create&Start",
+            threadId,
+            () => { _newScope.Execute(); }
+        ).Execute();
 
         var usualCommand = new Mock<ICommand>();
         usualCommand.Setup(cmd => cmd.Execute()).Verifiable();
@@ -53,7 +58,7 @@ public class ServerThreadTest
         IoC.Resolve<ICommand>(
             "Thread.SendCommand", threadId,
              IoC.Resolve<ICommand>(
-                "Thread.HardStop", serverThread, () => { mre.Set(); }
+                "Thread.HardStop", threadId, () => { mre.Set(); }
             )
         ).Execute();
 

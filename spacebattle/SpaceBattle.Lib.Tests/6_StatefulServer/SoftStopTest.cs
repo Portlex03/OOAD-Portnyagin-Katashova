@@ -4,6 +4,9 @@ using Hwdtech.Ioc;
 using Hwdtech;
 using Moq;
 
+using ThreadDict = Dictionary<int, ServerThread>;
+using QueueDict = Dictionary<int, System.Collections.Concurrent.BlockingCollection<Hwdtech.ICommand>>;
+
 public class SoftStopTest
 {
     private readonly ICommand _newScope;
@@ -15,6 +18,8 @@ public class SoftStopTest
         _newScope.Execute();
 
         ((ICommand)new RegisterGetThreadSenderDictCommand().Execute()).Execute();
+
+        ((ICommand)new RegisterGetThreadDictCommand().Execute()).Execute();
 
         ((ICommand)new RegisterSendCommand().Execute()).Execute();
 
@@ -28,10 +33,13 @@ public class SoftStopTest
     [Fact]
     public void Successful_SoftStop_ServerThread()
     {
-        var threadId = 3;
+        var threadId = 4;
 
-        var serverThread = IoC.Resolve<ServerThread>(
-            "Thread.Create&Start", threadId, () => { _newScope.Execute(); });
+        IoC.Resolve<ICommand>(
+            "Thread.Create&Start",
+            threadId,
+            () => { _newScope.Execute(); }
+        ).Execute();
 
         var usualCommand = new Mock<ICommand>();
         usualCommand.Setup(cmd => cmd.Execute()).Verifiable();
@@ -46,7 +54,7 @@ public class SoftStopTest
             "Thread.SendCommand", threadId,
             IoC.Resolve<ICommand>(
                 "Thread.SoftStop",
-                serverThread,
+                threadId,
                 () => { mre.Set(); }
             )
         ).Execute();
@@ -59,22 +67,27 @@ public class SoftStopTest
 
         usualCommand.Verify(cmd => cmd.Execute(), Times.Exactly(4));
 
-        Assert.True(serverThread.QueueIsEmpty);
+        Assert.Empty(IoC.Resolve<QueueDict>("Thread.GetSenderDict")[threadId]);
     }
 
     [Fact]
     public void SoftStop_ServerThread_In_Another_Thread_With_Exception()
     {
-        int threadId = 4;
+        int threadId = 5;
 
-        var serverThread = IoC.Resolve<ServerThread>(
-            "Thread.Create&Start", threadId, () => { _newScope.Execute(); });
+        IoC.Resolve<ICommand>(
+            "Thread.Create&Start",
+            threadId,
+            () => { _newScope.Execute(); }
+        ).Execute();
 
-        var softStopCmd = new SoftStopCommand(serverThread);
+        var softStopCmd = new SoftStopCommand(
+            IoC.Resolve<ThreadDict>("Thread.GetDict")[threadId]
+        );
 
         Assert.Throws<Exception>(softStopCmd.Execute);
 
-        softStopCmd = IoC.Resolve<SoftStopCommand>("Thread.SoftStop", serverThread);
+        softStopCmd = IoC.Resolve<SoftStopCommand>("Thread.SoftStop", threadId);
 
         IoC.Resolve<ICommand>("Thread.SendCommand", threadId, softStopCmd).Execute();
     }

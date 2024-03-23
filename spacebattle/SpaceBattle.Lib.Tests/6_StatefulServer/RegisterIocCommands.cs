@@ -4,8 +4,8 @@ using System.Collections.Concurrent;
 using Hwdtech;
 using Moq;
 
+using ThreadDict = Dictionary<int, ServerThread>;
 using QueueDict = Dictionary<int, System.Collections.Concurrent.BlockingCollection<Hwdtech.ICommand>>;
-
 
 public class RegisterIoCScope : IStrategy
 {
@@ -28,6 +28,18 @@ public class RegisterGetThreadSenderDictCommand : IStrategy
         return IoC.Resolve<ICommand>(
             "IoC.Register", "Thread.GetSenderDict",
             (object[] args) => senderDict
+        );
+    }
+}
+
+public class RegisterGetThreadDictCommand : IStrategy
+{
+    public object Execute(params object[] args)
+    {
+        var threadDict = new ThreadDict();
+        return IoC.Resolve<ICommand>(
+            "IoC.Register", "Thread.GetDict",
+            (object[] args) => threadDict
         );
     }
 }
@@ -59,20 +71,23 @@ public class RegisterServerThreadCreateAndStartCommand : IStrategy
             "IoC.Register", "Thread.Create&Start",
             (object[] args) =>
             {
-                var threadId = (int)args[0];
+                return new ActionCommand(() =>
+                {
+                    var threadId = (int)args[0];
 
-                Action action = () => { };
-                if (args.Length > 1)
-                    action = (Action)args[1];
-                var actionCommand = new ActionCommand(action);
+                    Action action = () => { };
+                    if (args.Length > 1)
+                        action = (Action)args[1];
+                    var actionCommand = new ActionCommand(action);
 
-                var q = new BlockingCollection<ICommand>(100) { actionCommand };
-                var serverThread = new ServerThread(q);
+                    var q = new BlockingCollection<ICommand>(100) { actionCommand };
+                    var serverThread = new ServerThread(q);
 
-                IoC.Resolve<QueueDict>("Thread.GetSenderDict").TryAdd(threadId, q);
+                    IoC.Resolve<ThreadDict>("Thread.GetDict").TryAdd(threadId, serverThread);
+                    IoC.Resolve<QueueDict>("Thread.GetSenderDict").TryAdd(threadId, q);
 
-                serverThread.Start();
-                return serverThread;
+                    serverThread.Start();
+                });
             }
         );
     }
@@ -86,7 +101,8 @@ public class RegisterHardStopCommand : IStrategy
             "IoC.Register", "Thread.HardStop",
             (object[] args) =>
             {
-                var cmdList = new List<ICommand> { new HardStopCommand((ServerThread)args[0]) };
+                var serverThread = IoC.Resolve<ThreadDict>("Thread.GetDict")[(int)args[0]];
+                var cmdList = new List<ICommand> { new HardStopCommand(serverThread) };
 
                 if (args.Length > 1)
                     cmdList.Add(new ActionCommand((Action)args[1]));
@@ -105,11 +121,13 @@ public class RegisterSoftStopCommand : IStrategy
             "IoC.Register", "Thread.SoftStop",
             (object[] args) =>
             {
+                var serverThread = IoC.Resolve<ThreadDict>("Thread.GetDict")[(int)args[0]];
+
                 Action? action = null;
                 if (args.Length > 1)
                     action = (Action)args[1];
 
-                return new SoftStopCommand((ServerThread)args[0], action);
+                return new SoftStopCommand(serverThread, action);
             }
         );
     }
