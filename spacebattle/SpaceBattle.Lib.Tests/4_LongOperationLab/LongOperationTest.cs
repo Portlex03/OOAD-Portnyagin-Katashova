@@ -41,6 +41,6 @@ public class LongOperationTest
         var target = new Mock<IUObject>();
 
         var longOperation = new LongOperation(cmdName, target.Object);
-        Assert.NotNull(longOperation.RunStrategy());
+        Assert.NotNull(longOperation.Execute());
     }
 }

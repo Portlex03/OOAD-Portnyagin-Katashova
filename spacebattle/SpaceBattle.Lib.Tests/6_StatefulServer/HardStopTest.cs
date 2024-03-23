@@ -12,16 +12,16 @@ public class HardStopTest
     {
         new InitScopeBasedIoCImplementationCommand().Execute();
 
-        _newScope = (ICommand)new RegisterIoCScope().RunStrategy();
+        _newScope = (ICommand)new RegisterIoCScope().Execute();
         _newScope.Execute();
 
-        ((ICommand)new RegisterGetThreadSenderDictCommand().RunStrategy()).Execute();
+        ((ICommand)new RegisterGetThreadSenderDictCommand().Execute()).Execute();
 
-        ((ICommand)new RegisterSendCommand().RunStrategy()).Execute();
+        ((ICommand)new RegisterSendCommand().Execute()).Execute();
 
-        ((ICommand)new RegisterServerThreadCreateAndStartCommand().RunStrategy()).Execute();
+        ((ICommand)new RegisterServerThreadCreateAndStartCommand().Execute()).Execute();
 
-        ((ICommand)new RegisterHardStopCommand().RunStrategy()).Execute();
+        ((ICommand)new RegisterHardStopCommand().Execute()).Execute();
     }
 
     [Fact]
