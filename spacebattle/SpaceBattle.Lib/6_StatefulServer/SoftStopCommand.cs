@@ -1,7 +1,6 @@
 namespace SpaceBattle.Lib;
 using Hwdtech;
 
-
 public class SoftStopCommand : ICommand
 {
     private readonly ServerThread _t;

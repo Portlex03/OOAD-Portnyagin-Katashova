@@ -3,8 +3,8 @@ using Hwdtech.Ioc;
 using Hwdtech;
 using Moq;
 
-using ThreadDict = Dictionary<int, ServerThread>;
-using QueueDict = Dictionary<int, System.Collections.Concurrent.BlockingCollection<Hwdtech.ICommand>>;
+using ThreadDict = System.Collections.Concurrent.ConcurrentDictionary<int, ServerThread>;
+using QueueDict = System.Collections.Concurrent.ConcurrentDictionary<int, System.Collections.Concurrent.BlockingCollection<Hwdtech.ICommand>>;
 
 public class HardStopTest
 {

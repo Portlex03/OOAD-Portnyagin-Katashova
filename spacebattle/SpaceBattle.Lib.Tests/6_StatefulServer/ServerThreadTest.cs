@@ -4,7 +4,7 @@ using Hwdtech.Ioc;
 using Hwdtech;
 using Moq;
 
-using QueueDict = Dictionary<int, System.Collections.Concurrent.BlockingCollection<Hwdtech.ICommand>>;
+using QueueDict = System.Collections.Concurrent.ConcurrentDictionary<int, System.Collections.Concurrent.BlockingCollection<Hwdtech.ICommand>>;
 
 public class ServerThreadTest
 {
