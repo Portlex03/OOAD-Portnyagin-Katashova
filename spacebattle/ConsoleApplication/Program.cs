@@ -24,7 +24,7 @@ public class ConsoleApplication
         var threadDict = new Dictionary<int, object>();
 
         // стратегия создания и запуска потока сервера
-        var createAndStartServerCommand = new Mock<ICommand>();
+        var createAndStartServerCommand = new ActionCommand(() => { });
         IoC.Resolve<ICommand>(
             "IoC.Register", "Server.Thread.Create&Start",
             (object[] args) =>
@@ -36,22 +36,22 @@ public class ConsoleApplication
                 threadDict.TryAdd(threadId, $"ServerThread_№{threadId}");
 
                 // возвращаем команду, которая создала и зарегистрировала сервер
-                return createAndStartServerCommand.Object;
+                return createAndStartServerCommand;
             }
         ).Execute();
 
         // стратегия отправки команды по id потока
-        var sendToThreadCommand = new Mock<ICommand>();
+        var sendToThreadCommand = new ActionCommand(() => { });
         IoC.Resolve<ICommand>(
             "IoC.Register", "Server.Thread.SendCommand",
-            (object[] args) => sendToThreadCommand.Object
+            (object[] args) => sendToThreadCommand
         ).Execute();
 
         // стратегия остановки потока по id
-        var softStopCommand = new Mock<ICommand>();
+        var softStopCommand = new ActionCommand(() => { });
         IoC.Resolve<ICommand>(
             "IoC.Register", "Server.Thread.SoftStop",
-            (object[] args) => softStopCommand.Object
+            (object[] args) => softStopCommand
         ).Execute();
 
         // стратегия остановки всего сервера
