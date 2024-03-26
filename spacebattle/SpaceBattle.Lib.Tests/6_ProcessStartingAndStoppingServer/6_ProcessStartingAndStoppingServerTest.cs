@@ -67,13 +67,6 @@ public class ProcessStartingAndStoppingServerTest
             "IoC.Register", "Server.Stop",
             (object[] args) => new StopServerCommand()
         ).Execute();
-
-        // стратегия получения имени лог файла
-        var logFileName = "Exception.Logging";
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "Exception.GetLogFileName",
-            (object[] args) => logFileName
-        ).Execute();
     }
 
     [Fact]
@@ -163,6 +156,11 @@ public class ProcessStartingAndStoppingServerTest
     {
         // путь лог файла, куда запишется сообщение об ошибке
         var logFilePath = Path.GetTempFileName();
+
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "Game.Exception.GetTempFilePath",
+            (object[] args) => logFilePath
+        ).Execute();
 
         // Команда, которая выдала ошибку
         var cmd = Mock.Of<ICommand>();
