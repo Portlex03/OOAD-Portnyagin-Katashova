@@ -171,7 +171,7 @@ public class ProcessStartingAndStoppingServerTest
         var ex = new Exception();
 
         // инициализация обработчика
-        var exHandler = new ExceptionHandlerCommand(logFilePath, cmd, ex);
+        var exHandler = new ExceptionHandlerCommand(cmd, ex);
 
         // запись в лог файл
         exHandler.Execute();

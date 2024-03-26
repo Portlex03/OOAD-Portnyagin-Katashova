@@ -3,19 +3,21 @@ using Hwdtech;
 
 public class ExceptionHandlerCommand : ICommand
 {
-    private readonly string _logFilePath;
     private readonly ICommand _cmd;
     private readonly Exception _ex;
-    public ExceptionHandlerCommand(string logFilePath, ICommand cmd, Exception ex)
+    public ExceptionHandlerCommand(ICommand cmd, Exception ex)
     {
-        _logFilePath = logFilePath;
         _cmd = cmd;
         _ex = ex;
     }
     public void Execute()
     {
+        var logFilePath = IoC.Resolve<string>("Game.Exception.GetTempFilePath");
+
         var exMessage = $"Exception in command {_cmd.GetType().Name}. Message: {_ex.Message}";
 
-        File.WriteAllText(_logFilePath, exMessage);
+        using StreamWriter writer = new(logFilePath, true);
+
+        writer.WriteLine(exMessage);
     }
 }
