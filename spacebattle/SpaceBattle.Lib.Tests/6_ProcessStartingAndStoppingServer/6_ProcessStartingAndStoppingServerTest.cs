@@ -59,7 +59,11 @@ public class ProcessStartingAndStoppingServerTest
         var softStopCommand = new Mock<ICommand>();
         IoC.Resolve<ICommand>(
             "IoC.Register", "Server.Thread.SoftStop",
-            (object[] args) => softStopCommand.Object
+            (object[] args) => {
+                var actionCmd = new ActionCommand((Action)args[1]);
+                actionCmd.Execute();
+                return softStopCommand.Object;
+            }
         ).Execute();
 
         // стратегия остановки всего сервера

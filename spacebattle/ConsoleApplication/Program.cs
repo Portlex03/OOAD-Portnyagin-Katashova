@@ -51,7 +51,11 @@ public class ConsoleApplication
         var softStopCommand = new ActionCommand(() => { });
         IoC.Resolve<ICommand>(
             "IoC.Register", "Server.Thread.SoftStop",
-            (object[] args) => softStopCommand
+            (object[] args) => {
+                var actionCmd = new ActionCommand((Action)args[1]);
+                actionCmd.Execute();
+                return softStopCommand;
+            }
         ).Execute();
 
         // стратегия остановки всего сервера
