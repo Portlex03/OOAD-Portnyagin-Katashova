@@ -161,6 +161,9 @@ public class ProcessStartingAndStoppingServerTest
     [Fact]
     public void SuccessfulLoggingInFile()
     {
+        // путь лог файла, куда запишется сообщение об ошибке
+        var logFilePath = Path.GetTempFileName();
+
         // Команда, которая выдала ошибку
         var cmd = Mock.Of<ICommand>();
 
@@ -168,19 +171,16 @@ public class ProcessStartingAndStoppingServerTest
         var ex = new Exception();
 
         // инициализация обработчика
-        var exHandler = new ExceptionHandlerCommand(cmd, ex);
+        var exHandler = new ExceptionHandlerCommand(logFilePath, cmd, ex);
 
         // запись в лог файл
         exHandler.Execute();
 
-        // имя лог файла, куда записалось сообщение об ошибке
-        var logFileName = "Exception.Logging";
-
         // чтение всех строк лог файла
-        var logFileLines = File.ReadAllLines(logFileName);
+        var logFileLines = File.ReadAllLines(logFilePath);
 
         // проверка, что файл существует
-        Assert.True(File.Exists(logFileName));
+        // Assert.True(File.Exists(logFileName));
 
         // сообщение об ошибке
         var exMessage = $"Exception in command {cmd.GetType().Name}. Message: {ex.Message}";
