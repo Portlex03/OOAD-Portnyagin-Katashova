@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="coverlet.msbuild" Version="6.0.0">
+    <PackageReference Include="coverlet.msbuild" Version="6.0.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SpaceBattle.Lib\SpaceBattle.Lib.csproj" />
+    <ProjectReference Include="..\ConsoleApplication\ConsoleApplication.csproj" />
   </ItemGroup>
 
 </Project>
