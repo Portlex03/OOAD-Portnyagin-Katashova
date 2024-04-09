@@ -6,14 +6,15 @@ using WebHttp;
 
 public class EndPointTest
 {
-    [Fact]
-    public void WebApi_Gets_Messages_And_Sends_It_To_Thread()
+    readonly Mock<ICommand> _sendCmd;
+    public EndPointTest()
     {
         new InitScopeBasedIoCImplementationCommand().Execute();
 
+        _sendCmd = new Mock<ICommand>();
         IoC.Resolve<ICommand>(
-            "IoC.Register", "Thead.GetByGameId",
-            (object[] args) => "fuck"
+            "IoC.Register", "Thread.SendCmd",
+            (object[] args) => _sendCmd.Object
         ).Execute();
 
         var createFromMesssageCmd = new Mock<ICommand>();
@@ -21,14 +22,12 @@ public class EndPointTest
             "IoC.Register", "Command.CreateFromMessage",
             (object[] args) => createFromMesssageCmd.Object
         ).Execute();
+    }
 
-        var sendCmd = new Mock<ICommand>();
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "Thread.SendCommand",
-            (object[] args) => sendCmd.Object
-        ).Execute();
-
-        var messagesList = new MessageContract[4]
+    [Fact]
+    public void WebApi_Gets_Messages_And_Sends_It_To_Thread()
+    {     
+        var messagesList = new List<MessageContract>()
         {
             new() { Type = "start movement", GameId = "asdfg", GameItemId = 1488, InitialValues = new() { { "Velocity", 2 } } },
             new() { Type = "start rotatement", GameId = "asdfg", GameItemId = 13, InitialValues = new() { {"AngularVelocity", 135 }, { "N", 8 } } },
@@ -36,11 +35,10 @@ public class EndPointTest
             new() { Type = "stop shooting", GameId = "asdfg", GameItemId = 77 }
         };
         var webApi = new WebApi();
-        var length = messagesList.Length;
+        var length = messagesList.Count;
 
-        Array.ForEach(messagesList, webApi.GetMessage);
+        messagesList.ForEach(webApi.GetMessage);
         
-        createFromMesssageCmd.Verify(cmd => cmd.Execute(), Times.Exactly(length));
-        sendCmd.Verify(cmd => cmd.Execute(), Times.Exactly(length));
+        _sendCmd.Verify(cmd => cmd.Execute(), Times.Exactly(length));
     }
 }
