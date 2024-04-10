@@ -392,3 +392,5 @@ FodyWeavers.xsd
 *.sln.iml
 
 .config
+
+.gitignore

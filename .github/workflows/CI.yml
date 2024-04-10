@@ -1,9 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches:
-      - 'Lab**'
   pull_request:
     branches:
       - main
@@ -23,17 +20,17 @@ jobs:
       - name: Restore dependencies
         run: cd spacebattle && dotnet restore SpaceBattle.Lib.Tests
 
-      - name: Install Required Tools
-        run: |
-          dotnet new tool-manifest
-          dotnet tool install dotnet-coverage
-          dotnet tool install coverlet.console
+      # - name: Install Required Tools
+      #   run: |
+      #     dotnet new tool-manifest
+      #     dotnet tool install dotnet-coverage
+      #     dotnet tool install coverlet.console
 
       - name: Build
         run: cd spacebattle && dotnet build
 
       - name: Coverage and test
-        run: cd spacebattle && dotnet coverlet SpaceBattle.Lib.Tests/bin/Debug/net7.0/SpaceBattle.Lib.Tests.dll --target "dotnet" --targetargs "test --no-build" -f=opencover -o="coverage.xml"
+        run: cd spacebattle && dotnet coverlet SpaceBattle.Lib.Tests/bin/Debug/net7.0/SpaceBattle.Lib.Tests.dll --target "dotnet" --targetargs "test --no-build" -f=opencover -o="CodeCoverage/coverage.xml"
       
       - name: Checkstyle
         run: cd spacebattle && dotnet format --verify-no-changes
