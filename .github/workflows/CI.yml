@@ -29,15 +29,19 @@ jobs:
       - name: Build
         run: cd spacebattle && dotnet build
 
-      - name: Coverage and test
+      - name: Test and create coverage file
         # run: cd spacebattle && dotnet coverlet SpaceBattle.Lib.Tests/bin/Debug/net7.0/SpaceBattle.Lib.Tests.dll --target "dotnet" --targetargs "test --no-build" -f=opencover -o="CodeCoverage/coverage.xml"
         run: cd spacebattle && dotnet test --no-build --collect:"XPlat Code Coverage;Format=opencover" --settings coverlet.runsettings
         
         # -name "*.xml" -exec mv {} spacebattle/CodeCoverage/coverage.opencover.xml/
       - name: Find coverage file
         run: find spacebattle/CodeCoverage;
+
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: Portlex03/OOAaD
       
       - name: Checkstyle
         run: cd spacebattle && dotnet format --verify-no-changes
