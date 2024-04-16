@@ -2,7 +2,9 @@ using CoreWCF;
 using CoreWCF.Configuration;
 using Swashbuckle.AspNetCore.Swagger;
 using WebHttp;
+using System.Diagnostics.CodeAnalysis;
 
+[ExcludeFromCodeCoverage]
 internal sealed class Startup
 {
     public void ConfigureServices(IServiceCollection services)

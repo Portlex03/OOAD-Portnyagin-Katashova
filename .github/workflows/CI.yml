@@ -1,6 +1,9 @@
 name: CI
 
 on:
+  push:
+    branches:
+      - 'Lab**'
   pull_request:
     branches:
       - main
@@ -20,28 +23,17 @@ jobs:
       - name: Restore dependencies
         run: cd spacebattle && dotnet restore SpaceBattle.Lib.Tests
 
-      # - name: Install Required Tools
-      #   run: |
-      #     dotnet new tool-manifest
-      #     dotnet tool install dotnet-coverage
-      #     dotnet tool install coverlet.console
+      - name: Install Required Tools
+        run: |
+          dotnet new tool-manifest
+          dotnet tool install dotnet-coverage
+          dotnet tool install coverlet.console
 
       - name: Build
         run: cd spacebattle && dotnet build
 
-      - name: Test and create coverage file
-        # run: cd spacebattle && dotnet coverlet SpaceBattle.Lib.Tests/bin/Debug/net7.0/SpaceBattle.Lib.Tests.dll --target "dotnet" --targetargs "test --no-build" -f=opencover -o="CodeCoverage/coverage.xml"
-        run: cd spacebattle && dotnet test --no-build --collect:"XPlat Code Coverage;Format=opencover" --settings coverlet.runsettings
-        
-        # -name "*.xml" -exec mv {} spacebattle/CodeCoverage/coverage.opencover.xml/
-      - name: Find coverage file
-        run: find spacebattle/CodeCoverage;
-
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4.0.1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          slug: Portlex03/OOAaD
+      - name: Coverage and test
+        run: cd spacebattle && dotnet coverlet SpaceBattle.Lib.Tests/bin/Debug/net7.0/SpaceBattle.Lib.Tests.dll --target "dotnet" --targetargs "test --no-build" -f=opencover -o="coverage.xml"
       
       - name: Checkstyle
         run: cd spacebattle && dotnet format --verify-no-changes
