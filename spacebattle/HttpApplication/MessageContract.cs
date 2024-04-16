@@ -7,16 +7,16 @@ namespace WebHttp;
 public class MessageContract
 {
     [DataMember(Name = "Type", IsRequired = true, Order = 1)]
-    [OpenApiProperty(Description = "Тип команды.")]
+    [OpenApiProperty(Description = "Тип команды")]
     public required string Type { get; set; }
 
-    [DataMember(Name = "GameId", IsRequired = true, Order = 2)]
-    [OpenApiProperty(Description = "Id потока")]
-    public required string GameId { get; set; }
+    [DataMember(Name = "GameID", IsRequired = true, Order = 2)]
+    [OpenApiProperty(Description = "ID игры")]
+    public required string GameID { get; set; }
 
-    [DataMember(Name = "GameItemId", IsRequired = true, Order = 3)]
-    [OpenApiProperty(Description = "Id объекта")]
-    public required uint GameItemId { get; set; }
+    [DataMember(Name = "GameItemID", IsRequired = true, Order = 3)]
+    [OpenApiProperty(Description = "ID игрового объекта")]
+    public required uint GameItemID { get; set; }
 
     [DataMember(Name = "InitialValues", IsRequired = true, Order = 4)]
     [OpenApiProperty(Description = "Начальные значения для команды")]
