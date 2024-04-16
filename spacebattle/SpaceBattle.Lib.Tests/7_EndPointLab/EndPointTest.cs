@@ -26,7 +26,7 @@ public class EndPointTest
 
     [Fact]
     public void WebApi_Gets_Messages_And_Sends_It_To_Thread()
-    {     
+    {
         var messagesList = new List<MessageContract>()
         {
             new() { Type = "start movement", GameId = "asdfg", GameItemId = 1488, InitialValues = new() { { "Velocity", 2 } } },
@@ -38,7 +38,7 @@ public class EndPointTest
         var length = messagesList.Count;
 
         messagesList.ForEach(webApi.GetMessage);
-        
+
         _sendCmd.Verify(cmd => cmd.Execute(), Times.Exactly(length));
     }
 }

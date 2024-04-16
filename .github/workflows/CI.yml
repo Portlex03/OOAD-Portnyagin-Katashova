@@ -32,7 +32,12 @@ jobs:
       - name: Coverage and test
         # run: cd spacebattle && dotnet coverlet SpaceBattle.Lib.Tests/bin/Debug/net7.0/SpaceBattle.Lib.Tests.dll --target "dotnet" --targetargs "test --no-build" -f=opencover -o="CodeCoverage/coverage.xml"
         run: cd spacebattle && dotnet test --no-build --collect:"XPlat Code Coverage;Format=opencover" --settings coverlet.runsettings --verbosity normal
-
+        
+        # "*.xml" -exec mv {} spacebattle/CodeCoverage/coverage.opencover.xml/
+      - name: Find coverage file
+        run: find spacebattle/CodeCoverage -name;
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
         # dotnet test --no-build --collect:"XPlat Code Coverage;Format=opencover" --verbosity normal
       
       - name: Checkstyle
