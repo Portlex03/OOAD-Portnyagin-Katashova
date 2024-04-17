@@ -13,23 +13,20 @@ public class EndPointTest
 
         var startServerCmd = new Mock<ICommand>();
         IoC.Resolve<ICommand>(
-            "IoC.Register", "Thread.Create&Start",
-            (object[] args) =>
+            "IoC.Register", "Thread.CreateAndStart",
+            (object[] args) => new ActionCommand(() =>
             {
-                return new ActionCommand(() =>
-                {
-                    var threadID = (string)args[0];
+                var threadID = (string)args[0];
 
-                    startServerCmd.Object.Execute();
+                startServerCmd.Object.Execute();
 
-                    var q = new BlockingCollection<ICommand>(10);
+                var q = new BlockingCollection<ICommand>(10);
 
-                    IoC.Resolve<ICommand>(
-                        "IoC.Register", $"Queue.{threadID}",
-                        (object[] args) => q
-                    ).Execute();
-                });
-            }
+                IoC.Resolve<ICommand>(
+                    "IoC.Register", $"Queue.{threadID}",
+                    (object[] args) => q
+                ).Execute();
+            })
         ).Execute();
 
         IoC.Resolve<ICommand>(
@@ -67,7 +64,7 @@ public class EndPointTest
             (object[] args) => getThreadIDByGameID.Object.Execute(args)
         ).Execute();
 
-        IoC.Resolve<ICommand>("Thread.Create&Start", threadID).Execute();
+        IoC.Resolve<ICommand>("Thread.CreateAndStart", threadID).Execute();
 
         var messagesList = new List<MessageContract>()
         {
