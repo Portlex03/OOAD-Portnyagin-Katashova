@@ -68,10 +68,24 @@ public class EndPointTest
 
         var messagesList = new List<MessageContract>()
         {
-            new() { Type = "start movement", GameID = "asdfg", GameItemID = 1488, InitialValues = new() { { "Velocity", 2 } } },
-            new() { Type = "start rotatement", GameID = "asdfg", GameItemID = 13, InitialValues = new() { {"AngularVelocity", 135 }, { "N", 8 } } },
-            new() { Type = "stop movement", GameID = "asdfg", GameItemID = 666 },
-            new() { Type = "stop shooting", GameID = "asdfg", GameItemID = 77 }
+            new() {
+                Type = "start movement",
+                GameID = "asdfg",
+                GameItemID = 1488,
+                InitialValues = new() { { "Velocity", 2 } } },
+            new() {
+                Type = "start rotatement",
+                GameID = "asdfg",
+                GameItemID = 13,
+                InitialValues = new() { {"AngularVelocity", 135 }, { "N", 8 } } },
+            new() {
+                Type = "stop movement",
+                GameID = "asdfg",
+                GameItemID = 666 },
+            new() {
+                Type = "stop shooting",
+                GameID = "asdfg",
+                GameItemID = 77 }
         };
         var webApi = new WebApi();
         var length = messagesList.Count;
