@@ -31,7 +31,7 @@ public class GameInCommandTest
             (object[] args) =>
             {
                 var q = (Queue<ICommand>)args[0];
-                if(q.TryDequeue(out ICommand? cmd))
+                if (q.TryDequeue(out ICommand? cmd))
                     return cmd;
                 throw new Exception();
             }
@@ -47,7 +47,7 @@ public class GameInCommandTest
 
         Enumerable.Range(0, 3).ToList().ForEach(iter => q.Enqueue(cmd.Object));
 
-        var gameInCommand = new GameInCommand(_scope, q);
+        var gameInCommand = new GameInCommand(IoC.Resolve<object>("Scopes.New", _scope), q);
 
         gameInCommand.Execute();
 

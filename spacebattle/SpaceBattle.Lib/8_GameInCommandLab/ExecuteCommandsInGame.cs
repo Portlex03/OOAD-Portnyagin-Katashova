@@ -12,7 +12,7 @@ public class ExecuteCommandsInGame : ICommand
     {
         var stopWatch = new Stopwatch();
         var quantum = IoC.Resolve<int>("Game.Quantum");
-        
+
         stopWatch.Start();
         while (stopWatch.ElapsedMilliseconds <= quantum)
         {
@@ -21,11 +21,11 @@ public class ExecuteCommandsInGame : ICommand
             {
                 cmd.Execute();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                IoC.Resolve<ICommand>("Exception.Handler", e).Execute();
+                IoC.Resolve<ICommand>("Exception.Handler", ex, cmd).Execute();
             }
         }
         stopWatch.Stop();
-    }    
+    }
 }
