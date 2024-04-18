@@ -2,21 +2,29 @@ namespace SpaceBattle.Lib;
 using Hwdtech;
 using System.Diagnostics;
 
-public class ExecuteCommandsInGame : ICommand
+public class GameAsCommand : ICommand
 {
+    readonly object _scope;
     readonly Queue<ICommand> _q;
 
-    public ExecuteCommandsInGame(Queue<ICommand> q) => _q = q; 
-    
+    public GameAsCommand(object scope, Queue<ICommand> q)
+    {
+        _scope = scope;
+        _q = q;
+    }
+
     public void Execute()
     {
+        IoC.Resolve<ICommand>("Scopes.Current.Set", _scope).Execute();
+
         var stopWatch = new Stopwatch();
-        var quantum = IoC.Resolve<int>("Game.Quantum");
 
         stopWatch.Start();
-        while (stopWatch.ElapsedMilliseconds <= quantum)
+        while (stopWatch.ElapsedMilliseconds <= IoC.Resolve<int>("Game.Quant"))
         {
-            var cmd = IoC.Resolve<ICommand>("Game.Queue.Dequeue", _q);
+            if (_q.Count == 0)
+                break;
+            var cmd = _q.Dequeue();
             try
             {
                 cmd.Execute();

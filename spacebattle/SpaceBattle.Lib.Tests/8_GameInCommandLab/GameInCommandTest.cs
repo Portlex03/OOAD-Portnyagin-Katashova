@@ -6,6 +6,8 @@ using Moq;
 public class GameInCommandTest
 {
     readonly object _scope;
+    readonly Mock<IStrategy> _getQuantCmd = new();
+
     public GameInCommandTest()
     {
         new InitScopeBasedIoCImplementationCommand().Execute();
@@ -14,42 +16,57 @@ public class GameInCommandTest
         IoC.Resolve<ICommand>("Scopes.Current.Set", _scope).Execute();
 
         IoC.Resolve<ICommand>(
-            "IoC.Register", "Game.ExecuteCommands",
-            (object[] args) => new ExecuteCommandsInGame((Queue<ICommand>)args[0])
-        ).Execute();
-
-        var getQuantumCmd = new Mock<IStrategy>();
-        getQuantumCmd.Setup(cmd => cmd.Execute()).Returns(5);
-
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "Game.Quantum",
-            (object[] args) => getQuantumCmd.Object.Execute()
-        ).Execute();
-
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "Game.Queue.Dequeue",
-            (object[] args) =>
-            {
-                var q = (Queue<ICommand>)args[0];
-                if (q.TryDequeue(out ICommand? cmd))
-                    return cmd;
-                throw new Exception();
-            }
+            "IoC.Register", "Game.Quant",
+            (object[] args) => _getQuantCmd.Object.Execute()
         ).Execute();
     }
 
     [Fact]
-    public void Test1()
+    public void All_Commands_Execute_In_Game_Queue()
     {
-        var q = new Queue<ICommand>();
-
         var cmd = new Mock<ICommand>();
 
-        Enumerable.Range(0, 3).ToList().ForEach(iter => q.Enqueue(cmd.Object));
+        var q = new Queue<ICommand>();
+        q.Enqueue(cmd.Object);
+        q.Enqueue(cmd.Object);
+        q.Enqueue(cmd.Object);
+        q.Enqueue(cmd.Object);
 
-        var gameInCommand = new GameInCommand(IoC.Resolve<object>("Scopes.New", _scope), q);
+        var gameAsCommand = new GameAsCommand(
+            IoC.Resolve<object>("Scopes.New", _scope), q);
 
-        gameInCommand.Execute();
+        var quant = 50;
+        _getQuantCmd.Setup(cmd => cmd.Execute()).Returns(quant);
+
+        gameAsCommand.Execute();
+
+        Assert.True(q.Count == 0);
+    }
+
+    [Fact]
+    public void Commands_Executes_While_Time_Compliting_Less_Then_Quant()
+    {
+        var cmd = new Mock<ICommand>();
+
+        var longTimeCmd = new Mock<ICommand>();
+        longTimeCmd.Setup(cmd => cmd.Execute()).Callback(
+            () => { _getQuantCmd.Setup(cmd => cmd.Execute()).Returns(0); }
+        ).Verifiable();
+
+        var q = new Queue<ICommand>();
+        q.Enqueue(cmd.Object);
+        q.Enqueue(cmd.Object);
+        q.Enqueue(longTimeCmd.Object);
+        q.Enqueue(cmd.Object);
+        q.Enqueue(cmd.Object);
+
+        var gameAsCommand = new GameAsCommand(
+            IoC.Resolve<object>("Scopes.New", _scope), q);
+
+        var quant = 50;
+        _getQuantCmd.Setup(cmd => cmd.Execute()).Returns(quant);
+
+        gameAsCommand.Execute();
 
         Assert.True(q.Count == 2);
     }
