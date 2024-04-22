@@ -24,17 +24,6 @@ public class ExceptionHandlerTest
         ).Execute();
 
         IoC.Resolve<ICommand>(
-            "IoC.Register", "Game.Queue.Dequeue",
-            (object[] args) =>
-            {
-                var q = (Queue<ICommand>)args[0];
-                if (q.TryDequeue(out ICommand? cmd))
-                    return cmd;
-                throw new InvalidOperationException();
-            }
-        ).Execute();
-
-        IoC.Resolve<ICommand>(
             "IoC.Register", "Exception.Handler",
             (object[] args) =>
             {
