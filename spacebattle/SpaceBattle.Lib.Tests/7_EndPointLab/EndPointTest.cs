@@ -11,10 +11,14 @@ public class EndPointTest
     private readonly Mock<ICommand> _createFromMesssageCmd = new();
     private readonly Mock<ICommand> _sendCmd = new();
     private readonly List<MessageContract> _messagesList = new();
-    
+
     public EndPointTest()
     {
         new InitScopeBasedIoCImplementationCommand().Execute();
+
+        IoC.Resolve<ICommand>("Scopes.Current.Set",
+            IoC.Resolve<object>("Scopes.New", IoC.Resolve<object>("Scopes.Root"))
+        ).Execute();
 
         IoC.Resolve<ICommand>(
             "IoC.Register", "Game.GetThreadIDByGameID",
@@ -70,42 +74,36 @@ public class EndPointTest
         _sendCmd.Verify(cmd => cmd.Execute(), Times.Exactly(_messagesList.Count));
     }
 
-    // [Fact]
-    // public void Impossible_To_Find_ThreadId_By_Game_Id()
-    // {
-    //     _getThreadIDByGameID.Setup(
-    //         cmd => cmd.Execute(It.IsAny<string>())
-    //     ).Throws<Exception>().Verifiable();
+    [Fact]
+    public void Impossible_To_Find_ThreadId_By_Game_Id()
+    {
+        _getThreadIDByGameID.Setup(
+            cmd => cmd.Execute(It.IsAny<string>())
+        ).Throws<Exception>().Verifiable();
 
-    //     var webApi = new WebApi();
+        var webApi = new WebApi();
 
-    //     var processMessagesCmd = new ActionCommand(() => 
-    //         { _messagesList.ForEach(webApi.ProcessMessage); });
+        var processMessagesCmd = new ActionCommand(() =>
+            { _messagesList.ForEach(webApi.ProcessMessage); });
 
-    //     Assert.Throws<Exception>(processMessagesCmd.Execute);
-    // }
+        Assert.Throws<Exception>(processMessagesCmd.Execute);
+    }
 
-    // [Fact]
-    // public void Impossible_To_Create_Command_From_Message()
-    // {
-        
-    // }
+    [Fact]
+    public void Impossible_To_Send_EndPoint_Command_To_Thread()
+    {
+        var threadID = "thread256";
+        _getThreadIDByGameID.Setup(
+            cmd => cmd.Execute(It.IsAny<string>())
+        ).Returns(threadID);
 
-    // [Fact]
-    // public void Impossible_To_Send_Command()
-    // {
-    //     var threadID = "thread64";
-    //     _getThreadIDByGameID.Setup(
-    //         cmd => cmd.Execute(It.IsAny<string>())
-    //     ).Returns(threadID);
-        
-    //     _sendCmd.Setup(cmd => cmd.Execute()).Throws<Exception>().Verifiable();
+        _sendCmd.Setup(cmd => cmd.Execute()).Throws<Exception>().Verifiable();
 
-    //     var webApi = new WebApi();
+        var webApi = new WebApi();
 
-    //     var processMessagesCmd = new ActionCommand(() => 
-    //         { _messagesList.ForEach(webApi.ProcessMessage); });
+        var processMessagesCmd = new ActionCommand(() =>
+            { _messagesList.ForEach(webApi.ProcessMessage); });
 
-    //     Assert.Throws<Exception>(processMessagesCmd.Execute);
-    // }
+        Assert.Throws<Exception>(processMessagesCmd.Execute);
+    }
 }
