@@ -6,7 +6,7 @@ namespace WebHttp;
 [ServiceBehavior(IncludeExceptionDetailInFaults = true)]
 public class WebApi : IWebApi
 {
-    public void GetMessage(MessageContract message)
+    public void ProcessMessage(MessageContract message)
     {
         var threadID = IoC.Resolve<string>("Game.GetThreadIDByGameID", message.GameID);
 

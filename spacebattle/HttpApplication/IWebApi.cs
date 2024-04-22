@@ -13,6 +13,6 @@ internal interface IWebApi
     [WebInvoke(Method = "POST", UriTemplate = "/command")]
     [OpenApiTag("Message")]
     [OpenApiResponse(ContentTypes = new[] { "application/json", "text" }, Description = "Accepted", StatusCode = HttpStatusCode.Accepted, Type = typeof(MessageContract))]
-    void GetMessage(
+    void ProcessMessage(
         [OpenApiParameter(ContentTypes = new[] { "application/json", "text" }, Description = "Get message from http endpoint")] MessageContract param);
 }

@@ -1,72 +1,37 @@
-namespace SpaceBattle.Lib.Tests;
 using Hwdtech.Ioc;
 using Hwdtech;
 using Moq;
 using WebHttp;
-using System.Collections.Concurrent;
+
+namespace SpaceBattle.Lib.Tests;
 
 public class EndPointTest
 {
+    private readonly Mock<IStrategy> _getThreadIDByGameID = new();
+    private readonly Mock<ICommand> _createFromMesssageCmd = new();
+    private readonly Mock<ICommand> _sendCmd = new();
+    private readonly List<MessageContract> _messagesList = new();
+    
     public EndPointTest()
     {
         new InitScopeBasedIoCImplementationCommand().Execute();
 
-        var startServerCmd = new Mock<ICommand>();
         IoC.Resolve<ICommand>(
-            "IoC.Register", "Thread.CreateAndStart",
-            (object[] args) => new ActionCommand(() =>
-            {
-                var threadID = (string)args[0];
+            "IoC.Register", "Game.GetThreadIDByGameID",
+            (object[] args) => _getThreadIDByGameID.Object.Execute(args)
+        ).Execute();
 
-                startServerCmd.Object.Execute();
-
-                var q = new BlockingCollection<ICommand>(10);
-
-                IoC.Resolve<ICommand>(
-                    "IoC.Register", $"Queue.{threadID}",
-                    (object[] args) => q
-                ).Execute();
-            })
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "Command.CreateFromMessage",
+            (object[] args) => _createFromMesssageCmd.Object
         ).Execute();
 
         IoC.Resolve<ICommand>(
             "IoC.Register", "Thread.SendCmd",
-            (object[] args) =>
-            {
-                var threadID = (string)args[0];
-                var cmd = (ICommand)args[1];
-
-                var q = IoC.Resolve<BlockingCollection<ICommand>>($"Queue.{threadID}");
-
-                return new SendCommand(q, cmd);
-            }
+            (object[] args) => _sendCmd.Object
         ).Execute();
 
-        var createFromMesssageCmd = new Mock<ICommand>();
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "Command.CreateFromMessage",
-            (object[] args) => createFromMesssageCmd.Object
-        ).Execute();
-    }
-
-    [Fact]
-    public void WebApi_Gets_Messages_And_Sends_It_To_Thread()
-    {
-        var threadID = "thread64";
-
-        var getThreadIDByGameID = new Mock<IStrategy>();
-        getThreadIDByGameID.Setup(
-            cmd => cmd.Execute(It.IsAny<object[]>())
-        ).Returns(threadID);
-
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "Game.GetThreadIDByGameID",
-            (object[] args) => getThreadIDByGameID.Object.Execute(args)
-        ).Execute();
-
-        IoC.Resolve<ICommand>("Thread.CreateAndStart", threadID).Execute();
-
-        var messagesList = new List<MessageContract>()
+        _messagesList = new List<MessageContract>()
         {
             new() {
                 Type = "start movement",
@@ -87,13 +52,60 @@ public class EndPointTest
                 GameID = "asdfg",
                 GameItemID = 77 }
         };
-        var webApi = new WebApi();
-        var length = messagesList.Count;
-
-        messagesList.ForEach(webApi.GetMessage);
-
-        var q = IoC.Resolve<BlockingCollection<ICommand>>($"Queue.{threadID}");
-
-        Assert.True(q.Count == 4);
     }
+
+    [Fact]
+    public void WebApi_Gets_Messages_And_Sends_It_To_Thread()
+    {
+        _sendCmd.Setup(cmd => cmd.Execute()).Verifiable();
+
+        var threadID = "thread64";
+        _getThreadIDByGameID.Setup(
+            cmd => cmd.Execute(It.IsAny<string>())
+        ).Returns(threadID);
+
+        var webApi = new WebApi();
+        _messagesList.ForEach(webApi.ProcessMessage);
+
+        _sendCmd.Verify(cmd => cmd.Execute(), Times.Exactly(_messagesList.Count));
+    }
+
+    // [Fact]
+    // public void Impossible_To_Find_ThreadId_By_Game_Id()
+    // {
+    //     _getThreadIDByGameID.Setup(
+    //         cmd => cmd.Execute(It.IsAny<string>())
+    //     ).Throws<Exception>().Verifiable();
+
+    //     var webApi = new WebApi();
+
+    //     var processMessagesCmd = new ActionCommand(() => 
+    //         { _messagesList.ForEach(webApi.ProcessMessage); });
+
+    //     Assert.Throws<Exception>(processMessagesCmd.Execute);
+    // }
+
+    // [Fact]
+    // public void Impossible_To_Create_Command_From_Message()
+    // {
+        
+    // }
+
+    // [Fact]
+    // public void Impossible_To_Send_Command()
+    // {
+    //     var threadID = "thread64";
+    //     _getThreadIDByGameID.Setup(
+    //         cmd => cmd.Execute(It.IsAny<string>())
+    //     ).Returns(threadID);
+        
+    //     _sendCmd.Setup(cmd => cmd.Execute()).Throws<Exception>().Verifiable();
+
+    //     var webApi = new WebApi();
+
+    //     var processMessagesCmd = new ActionCommand(() => 
+    //         { _messagesList.ForEach(webApi.ProcessMessage); });
+
+    //     Assert.Throws<Exception>(processMessagesCmd.Execute);
+    // }
 }
