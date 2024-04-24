@@ -133,9 +133,9 @@ public class MessageProcessingTest
         _getMessage.Setup(getMsg => getMsg.Execute()).Throws<NullCommandException>().Verifiable();
 
 
-        MessageProcessing myCommand = new MessageProcessing();
-        
-        var act = () => myCommand.Execute();
+        MessageProcessing msgProcess = new MessageProcessing();
+
+        var act = () => msgProcess.Execute();
 
 
         Assert.Throws<NullCommandException>(act);
@@ -150,9 +150,9 @@ public class MessageProcessingTest
         _getMessage.Setup(getMsg => getMsg.Execute()).Throws<InvalidOperationException>().Verifiable();
 
 
-        MessageProcessing myCommand = new MessageProcessing();
+        MessageProcessing msgProcess = new MessageProcessing();
 
-        var act = () => myCommand.Execute();
+        var act = () => msgProcess.Execute();
 
 
         Assert.Throws<InvalidOperationException>(act);
@@ -175,9 +175,9 @@ public class MessageProcessingTest
         _sendCommandInGame.Setup(sendCmd => sendCmd.Execute(It.IsAny<object[]>())).Throws<InvalidOperationException>().Verifiable();
 
 
-        MessageProcessing myCommand = new MessageProcessing();
+        MessageProcessing msgProcess = new MessageProcessing();
 
-        var act = () => myCommand.Execute();
+        var act = () => msgProcess.Execute();
 
 
         Assert.Throws<InvalidOperationException>(act);
@@ -200,5 +200,33 @@ public class MessageProcessingTest
     public void SendCommandInGameReturnsNull()
     {
         _message.SetupGet(msg => msg.gameId).Returns(gameIdCorrect).Verifiable();
+
+        _getMessage.Setup(getMsg => getMsg.Execute()).Returns(_message.Object).Verifiable();
+
+        _interpretCmd.Setup(x => x.Execute()).Verifiable();
+
+        _getInterpretateMessageCommand.Setup(x => x.Execute(It.IsAny<object[]>())).Returns(_interpretCmd.Object).Verifiable();
+
+        _sendCommandInGame.Setup(sendCmd => sendCmd.Execute(It.IsAny<object[]>())).Throws<NullCommandException>().Verifiable();
+
+
+        MessageProcessing msgProcess = new MessageProcessing();
+
+        var act = () => msgProcess.Execute();
+
+
+        Assert.Throws<NullCommandException>(act);
+
+        _getMessage.Verify(getMsg => getMsg.Execute(), Times.Exactly(1));
+
+        object[] expectArgs = new object[] { _message.Object };
+        _getInterpretateMessageCommand.Verify(x => x.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+
+        _sendCommandInGame.Verify(sendCmd => sendCmd.Execute(It.Is<object[]>(
+            factArg => (string)factArg[0] == gameIdCorrect && factArg[1] == _interpretCmd.Object)), Times.Exactly(1));
+
+        _message.VerifyGet<string>(x => x.gameId, Times.Exactly(1));
+
+        _interpretCmd.Verify(x => x.Execute(), Times.Never());
     }
 }
