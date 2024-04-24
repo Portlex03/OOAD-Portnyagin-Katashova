@@ -1,7 +1,7 @@
 namespace SpaceBattle.Lib;
 using Hwdtech;
 
-public class MyCommand : ICommand
+public class MessageProcessing : ICommand
 {
     public void Execute()
     {
@@ -22,10 +22,6 @@ public class MyCommand : ICommand
     }
 }
 
-public class NullCommandException : Exception
-{
-
-}
 
 
 
@@ -83,28 +79,28 @@ public class NullCommandException : Exception
     Ожидаем InvalidCastException
 */
 
-public class InterpretateCommand : ICommand
-{
-    private readonly IMessage _message;
-    public InterpretateCommand(IMessage message)
-    {
-        _message = message ?? throw new Exception();
-    }
-    public void Execute()
-    {
-        ICommand cmd = IoC.Resolve<ICommand>("GetCommand", _message) ?? throw new Exception(); // 4 mock
-        // 1 mock - Mock<Istrategy> для GetCommand, если null
-        // 2 mock - Mock<Istrategy> для GetCommand, если не null
-        // 3 mock - Mock<IStrategy> для GetCommand, что вызывает Exception
-        // 4 mock - Mock<ICommand>
-        ICommand sendCmd = IoC.Resolve<ICommand>("SendCommandInGame", _message.gameId, cmd) ?? throw new Exception(); // 4 mock
-        // 1 mock - Mock<IStrategy> для SendCommandInGame, что null
-        // 2 mock - Mock<Istrategy> для SendCommandInGame, что не null
-        // 3 mock - Mock<ICommand>
-        // 4 mock - Mock<IStrategy> для SendCommandInGame, что вызывает Exception
-        sendCmd.Execute();
-    }
-}
+// public class InterpretateCommand : ICommand
+// {
+//     private readonly IMessage _message;
+//     public InterpretateCommand(IMessage message)
+//     {
+//         _message = message ?? throw new Exception();
+//     }
+//     public void Execute()
+//     {
+//         ICommand cmd = IoC.Resolve<ICommand>("GetCommand", _message) ?? throw new Exception(); // 4 mock
+//         // 1 mock - Mock<Istrategy> для GetCommand, если null
+//         // 2 mock - Mock<Istrategy> для GetCommand, если не null
+//         // 3 mock - Mock<IStrategy> для GetCommand, что вызывает Exception
+//         // 4 mock - Mock<ICommand>
+//         ICommand sendCmd = IoC.Resolve<ICommand>("SendCommandInGame", _message.gameId, cmd) ?? throw new Exception(); // 4 mock
+//         // 1 mock - Mock<IStrategy> для SendCommandInGame, что null
+//         // 2 mock - Mock<Istrategy> для SendCommandInGame, что не null
+//         // 3 mock - Mock<ICommand>
+//         // 4 mock - Mock<IStrategy> для SendCommandInGame, что вызывает Exception
+//         sendCmd.Execute();
+//     }
+// }
 
 /*
         Сценарий 1 - GetCommand - null:
@@ -144,13 +140,13 @@ public class InterpretateCommand : ICommand
 */
 
 
-public class GetInterpretateMessageCommand : IStrategy
-{
-    public object Execute(params object[] args)
-    {
-        return new InterpretateCommand((IMessage) args[0]); 
-    }
-}
+// public class GetInterpretateMessageCommand : IStrategy
+// {
+//     public object Execute(params object[] args)
+//     {
+//         return new InterpretateCommand((IMessage) args[0]); 
+//     }
+// }
 
 // args пустой 
 // args[0] не является IMessage
