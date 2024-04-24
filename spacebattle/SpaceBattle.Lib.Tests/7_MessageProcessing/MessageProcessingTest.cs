@@ -126,9 +126,37 @@ public class MessageProcessingTest
     Ожидаем исключение InvalidCastException
     
 */
+    // Scenario 1
+    [Fact]
+    public void GetMessageReturnsNull()
+    {
+        _getMessage.Setup(getMsg => getMsg.Execute()).Throws<NullCommandException>().Verifiable();
+
+
+        MessageProcessing myCommand = new MessageProcessing();
+        var act = () => myCommand.Execute();
+
+
+        Assert.Throws<NullCommandException>(act);
+    }
+
+    // Scenario 2
+    [Fact]
+    public void GetMessageReturnsException()
+    {
+        _getMessage.Setup(getMsg => getMsg.Execute()).Throws<InvalidOperationException>().Verifiable();
+
+
+        MessageProcessing myCommand = new MessageProcessing();
+        var act = () => myCommand.Execute();
+
+
+        Assert.Throws<InvalidOperationException>(act);
+    }
+
     // Scenario 3
     [Fact]
-    public void SendCommandInGameThrowException()
+    public void GetMessageReturnsGameIdIncorrest()
     {
         _message.SetupGet(msg => msg.gameId).Returns(gameIdIncorrect).Verifiable();
 
@@ -158,5 +186,12 @@ public class MessageProcessingTest
         _message.VerifyGet<string>(x => x.gameId, Times.Exactly(1));
 
         _interpretCmd.Verify(x => x.Execute(), Times.Never());
+    }
+
+    // Scenario 4
+    [Fact]
+    public void SendCommandInGameReturnsNull()
+    {
+
     }
 }
