@@ -134,10 +134,13 @@ public class MessageProcessingTest
 
 
         MessageProcessing myCommand = new MessageProcessing();
+        
         var act = () => myCommand.Execute();
 
 
         Assert.Throws<NullCommandException>(act);
+
+        _getMessage.Verify(getMsg => getMsg.Execute(), Times.Exactly(1));
     }
 
     // Scenario 2
@@ -148,10 +151,13 @@ public class MessageProcessingTest
 
 
         MessageProcessing myCommand = new MessageProcessing();
+
         var act = () => myCommand.Execute();
 
 
         Assert.Throws<InvalidOperationException>(act);
+
+        _getMessage.Verify(getMsg => getMsg.Execute(), Times.Exactly(1));
     }
 
     // Scenario 3
@@ -170,6 +176,7 @@ public class MessageProcessingTest
 
 
         MessageProcessing myCommand = new MessageProcessing();
+
         var act = () => myCommand.Execute();
 
 
@@ -192,6 +199,6 @@ public class MessageProcessingTest
     [Fact]
     public void SendCommandInGameReturnsNull()
     {
-
+        _message.SetupGet(msg => msg.gameId).Returns(gameIdCorrect).Verifiable();
     }
 }
