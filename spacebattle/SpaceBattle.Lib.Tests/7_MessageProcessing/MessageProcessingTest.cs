@@ -229,4 +229,216 @@ public class MessageProcessingTest
 
         _interpretCmd.Verify(x => x.Execute(), Times.Never());
     }
+
+    // Scenario 5
+    [Fact]
+    public void SuccessfulMessageProcessing()
+    {
+        _message.SetupGet(msg => msg.gameId).Returns(gameIdCorrect).Verifiable();
+
+        _getMessage.Setup(getMsg => getMsg.Execute()).Returns(_message.Object).Verifiable();
+
+        _interpretCmd.Setup(x => x.Execute()).Verifiable();
+
+        _getInterpretateMessageCommand.Setup(x => x.Execute(It.IsAny<object[]>())).Returns(_interpretCmd.Object).Verifiable();
+
+        _sendCommandInGame.Setup(sendCmd => sendCmd.Execute(It.IsAny<object[]>())).Returns(_sendCmd.Object).Verifiable();
+
+
+        MessageProcessing msgProcess = new MessageProcessing();
+
+        var act = () => msgProcess.Execute();
+
+
+        // Assert.True(act);
+
+        _getMessage.Verify(getMsg => getMsg.Execute(), Times.Exactly(1));
+
+        object[] expectArgs = new object[] { _message.Object };
+        _getInterpretateMessageCommand.Verify(x => x.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+
+        _sendCommandInGame.Verify(sendCmd => sendCmd.Execute(It.Is<object[]>(
+            factArg => (string)factArg[0] == gameIdCorrect && factArg[1] == _interpretCmd.Object)), Times.Exactly(1));
+
+        _message.VerifyGet<string>(x => x.gameId, Times.Exactly(1));
+
+        _interpretCmd.Verify(x => x.Execute(), Times.Exactly(1));
+    }
+
+    // Scenario 6
+    [Fact]
+    public void SendCommandInGameReturnsException()
+    {
+        _message.SetupGet(msg => msg.gameId).Returns(gameIdCorrect).Verifiable();
+
+        _getMessage.Setup(getMsg => getMsg.Execute()).Returns(_message.Object).Verifiable();
+
+        _interpretCmd.Setup(x => x.Execute()).Verifiable();
+
+        _getInterpretateMessageCommand.Setup(x => x.Execute(It.IsAny<object[]>())).Returns(_interpretCmd.Object).Verifiable();
+
+        _sendCommandInGame.Setup(sendCmd => sendCmd.Execute(It.IsAny<object[]>())).Throws<InvalidOperationException>().Verifiable();
+
+
+        MessageProcessing msgProcess = new MessageProcessing();
+
+        var act = () => msgProcess.Execute();
+
+
+        Assert.Throws<InvalidOperationException>(act);
+
+        _getMessage.Verify(getMsg => getMsg.Execute(), Times.Exactly(1));
+
+        object[] expectArgs = new object[] { _message.Object };
+        _getInterpretateMessageCommand.Verify(x => x.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+
+        _sendCommandInGame.Verify(sendCmd => sendCmd.Execute(It.Is<object[]>(
+            factArg => (string)factArg[0] == gameIdCorrect && factArg[1] == _interpretCmd.Object)), Times.Exactly(1));
+
+        _message.VerifyGet<string>(x => x.gameId, Times.Exactly(1));
+
+        _interpretCmd.Verify(x => x.Execute(), Times.Never());
+    }
+
+    // Scenario 7
+    [Fact]
+    public void GetInterpretateMessageCommandReturnsNull()
+    {
+        _message.SetupGet(msg => msg.gameId).Returns(gameIdCorrect).Verifiable();
+
+        _getMessage.Setup(getMsg => getMsg.Execute()).Returns(_message.Object).Verifiable();
+
+        _interpretCmd.Setup(x => x.Execute()).Verifiable();
+
+        _getInterpretateMessageCommand.Setup(x => x.Execute(It.IsAny<object[]>())).Throws<NullCommandException>().Verifiable();
+
+
+        MessageProcessing msgProcess = new MessageProcessing();
+
+        var act = () => msgProcess.Execute();
+
+
+        Assert.Throws<NullCommandException>(act);
+
+        _getMessage.Verify(getMsg => getMsg.Execute(), Times.Exactly(1));
+
+        object[] expectArgs = new object[] { _message.Object };
+        _getInterpretateMessageCommand.Verify(x => x.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+
+        _message.VerifyGet<string>(x => x.gameId, Times.Exactly(1));
+
+        _interpretCmd.Verify(x => x.Execute(), Times.Never());
+    }
+
+    // Scenario 8
+    [Fact]
+    public void GetInterpretateMessageCommandReturnsException()
+    {
+        _message.SetupGet(msg => msg.gameId).Returns(gameIdCorrect).Verifiable();
+
+        _getMessage.Setup(getMsg => getMsg.Execute()).Returns(_message.Object).Verifiable();
+
+        _interpretCmd.Setup(x => x.Execute()).Verifiable();
+
+        _getInterpretateMessageCommand.Setup(x => x.Execute(It.IsAny<object[]>())).Throws<NullCommandException>().Verifiable();
+
+
+        MessageProcessing msgProcess = new MessageProcessing();
+
+        var act = () => msgProcess.Execute();
+
+
+        Assert.Throws<NullCommandException>(act);
+
+        _getMessage.Verify(getMsg => getMsg.Execute(), Times.Exactly(1));
+
+        object[] expectArgs = new object[] { _message.Object };
+        _getInterpretateMessageCommand.Verify(x => x.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+
+        _message.VerifyGet<string>(x => x.gameId, Times.Exactly(1));
+
+        _interpretCmd.Verify(x => x.Execute(), Times.Never());
+    }
+
+    // Scenario 9
+    [Fact]
+    public void GetMessageReturnsNonTypeIMessage()
+    {
+        _getMessage.Setup(getMsg => getMsg.Execute()).Throws<InvalidCastException>().Verifiable();
+
+
+        MessageProcessing msgProcess = new MessageProcessing();
+
+        var act = () => msgProcess.Execute();
+
+
+        Assert.Throws<InvalidCastException>(act);
+
+        _getMessage.Verify(getMsg => getMsg.Execute(), Times.Exactly(1));
+    }
+
+    // Scenario 10
+    [Fact]
+    public void GetInterpretateMessageCommandReturnsNonTypeICommand()
+    {
+        _message.SetupGet(msg => msg.gameId).Returns(gameIdCorrect).Verifiable();
+
+        _getMessage.Setup(getMsg => getMsg.Execute()).Returns(_message.Object).Verifiable();
+
+        _interpretCmd.Setup(x => x.Execute()).Verifiable();
+
+        _getInterpretateMessageCommand.Setup(x => x.Execute(It.IsAny<object[]>())).Throws<InvalidCastException>().Verifiable();
+
+
+        MessageProcessing msgProcess = new MessageProcessing();
+
+        var act = () => msgProcess.Execute();
+
+
+        Assert.Throws<InvalidCastException>(act);
+
+        _getMessage.Verify(getMsg => getMsg.Execute(), Times.Exactly(1));
+
+        object[] expectArgs = new object[] { _message.Object };
+        _getInterpretateMessageCommand.Verify(x => x.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+
+        _message.VerifyGet<string>(x => x.gameId, Times.Exactly(1));
+
+        _interpretCmd.Verify(x => x.Execute(), Times.Never());
+    }
+
+    // Scenario 11
+    [Fact]
+    public void SendCommandInGameReturnsNonTypeICommand()
+    {
+        _message.SetupGet(msg => msg.gameId).Returns(gameIdCorrect).Verifiable();
+
+        _getMessage.Setup(getMsg => getMsg.Execute()).Returns(_message.Object).Verifiable();
+
+        _interpretCmd.Setup(x => x.Execute()).Verifiable();
+
+        _getInterpretateMessageCommand.Setup(x => x.Execute(It.IsAny<object[]>())).Returns(_interpretCmd.Object).Verifiable();
+
+        _sendCommandInGame.Setup(sendCmd => sendCmd.Execute(It.IsAny<object[]>())).Throws<InvalidCastException>().Verifiable();
+
+
+        MessageProcessing msgProcess = new MessageProcessing();
+
+        var act = () => msgProcess.Execute();
+
+
+        Assert.Throws<InvalidCastException>(act);
+
+        _getMessage.Verify(getMsg => getMsg.Execute(), Times.Exactly(1));
+
+        object[] expectArgs = new object[] { _message.Object };
+        _getInterpretateMessageCommand.Verify(x => x.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+
+        _sendCommandInGame.Verify(sendCmd => sendCmd.Execute(It.Is<object[]>(
+            factArg => (string)factArg[0] == gameIdCorrect && factArg[1] == _interpretCmd.Object)), Times.Exactly(1));
+
+        _message.VerifyGet<string>(x => x.gameId, Times.Exactly(1));
+
+        _interpretCmd.Verify(x => x.Execute(), Times.Never());
+    }
 }
