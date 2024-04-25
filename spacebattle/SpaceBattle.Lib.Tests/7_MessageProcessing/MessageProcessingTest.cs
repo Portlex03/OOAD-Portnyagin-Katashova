@@ -14,7 +14,7 @@ public class MessageProcessingTest
     private readonly Mock<ICommand> _sendCmd = new();
     private readonly Mock<IStrategy> _getInterpretateMessageCommand = new();
     private readonly Mock<ICommand> _interpretCmd = new();
-    // private readonly Mock<IStrategy> _getCommand = new(); 
+
     public MessageProcessingTest()
     {
         new InitScopeBasedIoCImplementationCommand().Execute();
@@ -30,10 +30,6 @@ public class MessageProcessingTest
         IoC.Resolve<ICommand>("IoC.Register", "SendCommandInGame",
             (object[] args) => _sendCommandInGame.Object.Execute(args)
         ).Execute();
-
-        // IoC.Resolve<ICommand>("IoC.Register", "GetCommand",
-        //     (object[] args) => _getCommand.Object.Execute(args)
-        // ).Execute();
 
         IoC.Resolve<ICommand>("IoC.Register", "GetInterpretateMessageCommand",
             (object[] args) => _getInterpretateMessageCommand.Object.Execute(args)
@@ -80,7 +76,7 @@ public class MessageProcessingTest
     Необходимо:, чтобы Mock<Istrategy> GetMessage вернул Mock<IMessage>, 
         и Mock<Istrategy> для SendCommandInGame должен вернуть Mock<ICommand> и положить в IoC Mock<Istrategy>
     Вызываем: команду и выполняем её
-    Ожидаем:, что GetMessage вызовется 1 раз и SendCommandInGame 1 раз и у ICommand 1 раз
+    Ожидаем:, что GetMessage вызовется 1 раз и SendCommandInGame 1 раз и у ICommand 1 раз, sendCmd выполнится
     
         Сценарий 6 - GetMessage возвращает IMessage с id, но  SendCommandInGame возвращает Exception:
     Нужно Mock<Istrategy> для GetMessage , что не null, и Mock<IMessage> с правильным game_id,
@@ -124,13 +120,22 @@ public class MessageProcessingTest
     Необходимо, чтобы Mock<Istrategy> вернул Mock<IMessage>, и положить в IoC Mock<Istrategy>
     Вызываем команду и выполняем её
     Ожидаем исключение InvalidCastException
+
+        Сценарий 12 - sendCmd не сработал:
+    Нужно: Mock<Istrategy> для GetMessage , что не null, и Mock<IMessage> с правильным game_id,
+        и Mock<IStrategy> GetInterpretateMessageCommand - not null, 
+        и Mock<Istrategy> для SendCommandInGame , что не null, и Mock<ICommand>, sendCmd вернул Exception
+    Необходимо:, чтобы Mock<Istrategy> GetMessage вернул Mock<IMessage>, 
+        и Mock<Istrategy> для SendCommandInGame должен вернуть Mock<ICommand> и положить в IoC Mock<Istrategy>
+    Вызываем: команду и выполняем её
+    Ожидаем:, что GetMessage вызовется 1 раз и SendCommandInGame 1 раз и у ICommand 1 раз, sendCmd вернет Exception
     
 */
     // Scenario 1
     [Fact]
     public void GetMessageReturnsNull()
     {
-        _getMessage.Setup(getMsg => getMsg.Execute()).Throws<NullCommandException>().Verifiable();
+        _getMessage.Setup(strategy => strategy.Execute()).Returns(null).Verifiable();
 
 
         MessageProcessing msgProcess = new MessageProcessing();
@@ -140,14 +145,14 @@ public class MessageProcessingTest
 
         Assert.Throws<NullCommandException>(act);
 
-        _getMessage.Verify(getMsg => getMsg.Execute(), Times.Exactly(1));
+        _getMessage.Verify(strategy => strategy.Execute(), Times.Exactly(1));
     }
 
     // Scenario 2
     [Fact]
     public void GetMessageReturnsException()
     {
-        _getMessage.Setup(getMsg => getMsg.Execute()).Throws<InvalidOperationException>().Verifiable();
+        _getMessage.Setup(strategy => strategy.Execute()).Throws<InvalidOperationException>().Verifiable();
 
 
         MessageProcessing msgProcess = new MessageProcessing();
@@ -157,22 +162,22 @@ public class MessageProcessingTest
 
         Assert.Throws<InvalidOperationException>(act);
 
-        _getMessage.Verify(getMsg => getMsg.Execute(), Times.Exactly(1));
+        _getMessage.Verify(strategy => strategy.Execute(), Times.Exactly(1));
     }
 
     // Scenario 3
     [Fact]
     public void GetMessageReturnsGameIdIncorrest()
     {
-        _message.SetupGet(msg => msg.gameId).Returns(gameIdIncorrect).Verifiable();
+        _message.SetupGet(strategy => strategy.gameId).Returns(gameIdIncorrect).Verifiable();
 
-        _getMessage.Setup(getMsg => getMsg.Execute()).Returns(_message.Object).Verifiable();
+        _getMessage.Setup(strategy => strategy.Execute()).Returns(_message.Object).Verifiable();
 
-        _interpretCmd.Setup(x => x.Execute()).Verifiable();
+        _interpretCmd.Setup(cmd => cmd.Execute()).Verifiable();
 
-        _getInterpretateMessageCommand.Setup(x => x.Execute(It.IsAny<object[]>())).Returns(_interpretCmd.Object).Verifiable();
+        _getInterpretateMessageCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(_interpretCmd.Object).Verifiable();
 
-        _sendCommandInGame.Setup(sendCmd => sendCmd.Execute(It.IsAny<object[]>())).Throws<InvalidOperationException>().Verifiable();
+        _sendCommandInGame.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Throws<InvalidOperationException>().Verifiable();
 
 
         MessageProcessing msgProcess = new MessageProcessing();
@@ -182,32 +187,32 @@ public class MessageProcessingTest
 
         Assert.Throws<InvalidOperationException>(act);
 
-        _getMessage.Verify(getMsg => getMsg.Execute(), Times.Exactly(1));
+        _getMessage.Verify(strategy => strategy.Execute(), Times.Exactly(1));
 
         object[] expectArgs = new object[] { _message.Object };
-        _getInterpretateMessageCommand.Verify(x => x.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+        _getInterpretateMessageCommand.Verify(strategy => strategy.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
 
-        _sendCommandInGame.Verify(sendCmd => sendCmd.Execute(It.Is<object[]>(
+        _sendCommandInGame.Verify(strategy => strategy.Execute(It.Is<object[]>(
             factArg => (string)factArg[0] == gameIdIncorrect && factArg[1] == _interpretCmd.Object)), Times.Exactly(1));
 
-        _message.VerifyGet<string>(x => x.gameId, Times.Exactly(1));
+        _message.VerifyGet<string>(strategy => strategy.gameId, Times.Exactly(1));
 
-        _interpretCmd.Verify(x => x.Execute(), Times.Never());
+        _interpretCmd.Verify(cmd => cmd.Execute(), Times.Never());
     }
 
     // Scenario 4
     [Fact]
     public void SendCommandInGameReturnsNull()
     {
-        _message.SetupGet(msg => msg.gameId).Returns(gameIdCorrect).Verifiable();
+        _message.SetupGet(strategy => strategy.gameId).Returns(gameIdCorrect).Verifiable();
 
-        _getMessage.Setup(getMsg => getMsg.Execute()).Returns(_message.Object).Verifiable();
+        _getMessage.Setup(strategy => strategy.Execute()).Returns(_message.Object).Verifiable();
 
-        _interpretCmd.Setup(x => x.Execute()).Verifiable();
+        _interpretCmd.Setup(cmd => cmd.Execute()).Verifiable();
 
-        _getInterpretateMessageCommand.Setup(x => x.Execute(It.IsAny<object[]>())).Returns(_interpretCmd.Object).Verifiable();
+        _getInterpretateMessageCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(_interpretCmd.Object).Verifiable();
 
-        _sendCommandInGame.Setup(sendCmd => sendCmd.Execute(It.IsAny<object[]>())).Throws<NullCommandException>().Verifiable();
+        _sendCommandInGame.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(null).Verifiable();
 
 
         MessageProcessing msgProcess = new MessageProcessing();
@@ -217,32 +222,34 @@ public class MessageProcessingTest
 
         Assert.Throws<NullCommandException>(act);
 
-        _getMessage.Verify(getMsg => getMsg.Execute(), Times.Exactly(1));
+        _getMessage.Verify(strategy => strategy.Execute(), Times.Exactly(1));
 
         object[] expectArgs = new object[] { _message.Object };
-        _getInterpretateMessageCommand.Verify(x => x.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+        _getInterpretateMessageCommand.Verify(strategy => strategy.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
 
-        _sendCommandInGame.Verify(sendCmd => sendCmd.Execute(It.Is<object[]>(
+        _sendCommandInGame.Verify(strategy => strategy.Execute(It.Is<object[]>(
             factArg => (string)factArg[0] == gameIdCorrect && factArg[1] == _interpretCmd.Object)), Times.Exactly(1));
 
-        _message.VerifyGet<string>(x => x.gameId, Times.Exactly(1));
+        _message.VerifyGet<string>(strategy => strategy.gameId, Times.Exactly(1));
 
-        _interpretCmd.Verify(x => x.Execute(), Times.Never());
+        _interpretCmd.Verify(cmd => cmd.Execute(), Times.Never());
     }
 
     // Scenario 5
     [Fact]
     public void SuccessfulMessageProcessing()
     {
-        _message.SetupGet(msg => msg.gameId).Returns(gameIdCorrect).Verifiable();
+        _message.SetupGet(strategy => strategy.gameId).Returns(gameIdCorrect).Verifiable();
 
-        _getMessage.Setup(getMsg => getMsg.Execute()).Returns(_message.Object).Verifiable();
+        _getMessage.Setup(strategy => strategy.Execute()).Returns(_message.Object).Verifiable();
 
-        _interpretCmd.Setup(x => x.Execute()).Verifiable();
+        _interpretCmd.Setup(cmd => cmd.Execute()).Verifiable();
 
-        _getInterpretateMessageCommand.Setup(x => x.Execute(It.IsAny<object[]>())).Returns(_interpretCmd.Object).Verifiable();
+        _sendCmd.Setup(cmd => cmd.Execute()).Verifiable();
 
-        _sendCommandInGame.Setup(sendCmd => sendCmd.Execute(It.IsAny<object[]>())).Returns(_sendCmd.Object).Verifiable();
+        _getInterpretateMessageCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(_interpretCmd.Object).Verifiable();
+
+        _sendCommandInGame.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(_sendCmd.Object).Verifiable();
 
 
         MessageProcessing msgProcess = new MessageProcessing();
@@ -250,34 +257,43 @@ public class MessageProcessingTest
         var act = () => msgProcess.Execute();
 
 
-        // Assert.True(act);
+        try
+        {
+            act();
+        }
+        catch (Exception ex)
+        {
+            Assert.Fail("Test should be performed without exceptions");
+        }
 
-        _getMessage.Verify(getMsg => getMsg.Execute(), Times.Exactly(1));
+        _getMessage.Verify(strategy => strategy.Execute(), Times.Exactly(1));
 
         object[] expectArgs = new object[] { _message.Object };
-        _getInterpretateMessageCommand.Verify(x => x.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+        _getInterpretateMessageCommand.Verify(strategy => strategy.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
 
-        _sendCommandInGame.Verify(sendCmd => sendCmd.Execute(It.Is<object[]>(
+        _sendCommandInGame.Verify(strategy => strategy.Execute(It.Is<object[]>(
             factArg => (string)factArg[0] == gameIdCorrect && factArg[1] == _interpretCmd.Object)), Times.Exactly(1));
 
-        _message.VerifyGet<string>(x => x.gameId, Times.Exactly(1));
+        _message.VerifyGet<string>(strategy => strategy.gameId, Times.Exactly(1));
 
-        _interpretCmd.Verify(x => x.Execute(), Times.Exactly(1));
+        _sendCmd.Verify(cmd => cmd.Execute(), Times.Exactly(1));
+
+        _interpretCmd.Verify(cmd => cmd.Execute(), Times.Never());
     }
 
     // Scenario 6
     [Fact]
     public void SendCommandInGameReturnsException()
     {
-        _message.SetupGet(msg => msg.gameId).Returns(gameIdCorrect).Verifiable();
+        _message.SetupGet(strategy => strategy.gameId).Returns(gameIdCorrect).Verifiable();
 
-        _getMessage.Setup(getMsg => getMsg.Execute()).Returns(_message.Object).Verifiable();
+        _getMessage.Setup(strategy => strategy.Execute()).Returns(_message.Object).Verifiable();
 
-        _interpretCmd.Setup(x => x.Execute()).Verifiable();
+        _interpretCmd.Setup(cmd => cmd.Execute()).Verifiable();
 
-        _getInterpretateMessageCommand.Setup(x => x.Execute(It.IsAny<object[]>())).Returns(_interpretCmd.Object).Verifiable();
+        _getInterpretateMessageCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(_interpretCmd.Object).Verifiable();
 
-        _sendCommandInGame.Setup(sendCmd => sendCmd.Execute(It.IsAny<object[]>())).Throws<InvalidOperationException>().Verifiable();
+        _sendCommandInGame.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Throws<InvalidOperationException>().Verifiable();
 
 
         MessageProcessing msgProcess = new MessageProcessing();
@@ -287,30 +303,30 @@ public class MessageProcessingTest
 
         Assert.Throws<InvalidOperationException>(act);
 
-        _getMessage.Verify(getMsg => getMsg.Execute(), Times.Exactly(1));
+        _getMessage.Verify(strategy => strategy.Execute(), Times.Exactly(1));
 
         object[] expectArgs = new object[] { _message.Object };
-        _getInterpretateMessageCommand.Verify(x => x.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+        _getInterpretateMessageCommand.Verify(strategy => strategy.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
 
-        _sendCommandInGame.Verify(sendCmd => sendCmd.Execute(It.Is<object[]>(
+        _sendCommandInGame.Verify(strategy => strategy.Execute(It.Is<object[]>(
             factArg => (string)factArg[0] == gameIdCorrect && factArg[1] == _interpretCmd.Object)), Times.Exactly(1));
 
-        _message.VerifyGet<string>(x => x.gameId, Times.Exactly(1));
+        _message.VerifyGet<string>(strategy => strategy.gameId, Times.Exactly(1));
 
-        _interpretCmd.Verify(x => x.Execute(), Times.Never());
+        _interpretCmd.Verify(cmd => cmd.Execute(), Times.Never());
     }
 
     // Scenario 7
     [Fact]
     public void GetInterpretateMessageCommandReturnsNull()
     {
-        _message.SetupGet(msg => msg.gameId).Returns(gameIdCorrect).Verifiable();
+        _message.SetupGet(strategy => strategy.gameId).Returns(gameIdCorrect).Verifiable();
 
-        _getMessage.Setup(getMsg => getMsg.Execute()).Returns(_message.Object).Verifiable();
+        _getMessage.Setup(strategy => strategy.Execute()).Returns(_message.Object).Verifiable();
 
-        _interpretCmd.Setup(x => x.Execute()).Verifiable();
+        _interpretCmd.Setup(cmd => cmd.Execute()).Verifiable();
 
-        _getInterpretateMessageCommand.Setup(x => x.Execute(It.IsAny<object[]>())).Throws<NullCommandException>().Verifiable();
+        _getInterpretateMessageCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(null).Verifiable();
 
 
         MessageProcessing msgProcess = new MessageProcessing();
@@ -320,27 +336,27 @@ public class MessageProcessingTest
 
         Assert.Throws<NullCommandException>(act);
 
-        _getMessage.Verify(getMsg => getMsg.Execute(), Times.Exactly(1));
+        _getMessage.Verify(strategy => strategy.Execute(), Times.Exactly(1));
 
         object[] expectArgs = new object[] { _message.Object };
-        _getInterpretateMessageCommand.Verify(x => x.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+        _getInterpretateMessageCommand.Verify(strategy => strategy.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
 
-        _message.VerifyGet<string>(x => x.gameId, Times.Exactly(1));
+        _message.VerifyGet<string>(strategy => strategy.gameId, Times.Never());
 
-        _interpretCmd.Verify(x => x.Execute(), Times.Never());
+        _interpretCmd.Verify(cmd => cmd.Execute(), Times.Never());
     }
 
     // Scenario 8
     [Fact]
     public void GetInterpretateMessageCommandReturnsException()
     {
-        _message.SetupGet(msg => msg.gameId).Returns(gameIdCorrect).Verifiable();
+        _message.SetupGet(strategy => strategy.gameId).Returns(gameIdCorrect).Verifiable();
 
-        _getMessage.Setup(getMsg => getMsg.Execute()).Returns(_message.Object).Verifiable();
+        _getMessage.Setup(strategy => strategy.Execute()).Returns(_message.Object).Verifiable();
 
-        _interpretCmd.Setup(x => x.Execute()).Verifiable();
+        _interpretCmd.Setup(cmd => cmd.Execute()).Verifiable();
 
-        _getInterpretateMessageCommand.Setup(x => x.Execute(It.IsAny<object[]>())).Throws<NullCommandException>().Verifiable();
+        _getInterpretateMessageCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Throws<NullCommandException>().Verifiable();
 
 
         MessageProcessing msgProcess = new MessageProcessing();
@@ -350,21 +366,21 @@ public class MessageProcessingTest
 
         Assert.Throws<NullCommandException>(act);
 
-        _getMessage.Verify(getMsg => getMsg.Execute(), Times.Exactly(1));
+        _getMessage.Verify(strategy => strategy.Execute(), Times.Exactly(1));
 
         object[] expectArgs = new object[] { _message.Object };
-        _getInterpretateMessageCommand.Verify(x => x.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+        _getInterpretateMessageCommand.Verify(strategy => strategy.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
 
-        _message.VerifyGet<string>(x => x.gameId, Times.Exactly(1));
+        _message.VerifyGet<string>(strategy => strategy.gameId, Times.Never()); // Never
 
-        _interpretCmd.Verify(x => x.Execute(), Times.Never());
+        _interpretCmd.Verify(cmd => cmd.Execute(), Times.Never());
     }
 
     // Scenario 9
     [Fact]
     public void GetMessageReturnsNonTypeIMessage()
     {
-        _getMessage.Setup(getMsg => getMsg.Execute()).Throws<InvalidCastException>().Verifiable();
+        _getMessage.Setup(strategy => strategy.Execute()).Throws<InvalidCastException>().Verifiable();
 
 
         MessageProcessing msgProcess = new MessageProcessing();
@@ -374,20 +390,20 @@ public class MessageProcessingTest
 
         Assert.Throws<InvalidCastException>(act);
 
-        _getMessage.Verify(getMsg => getMsg.Execute(), Times.Exactly(1));
+        _getMessage.Verify(strategy => strategy.Execute(), Times.Exactly(1));
     }
 
     // Scenario 10
     [Fact]
     public void GetInterpretateMessageCommandReturnsNonTypeICommand()
     {
-        _message.SetupGet(msg => msg.gameId).Returns(gameIdCorrect).Verifiable();
+        _message.SetupGet(strategy => strategy.gameId).Returns(gameIdCorrect).Verifiable();
 
-        _getMessage.Setup(getMsg => getMsg.Execute()).Returns(_message.Object).Verifiable();
+        _getMessage.Setup(strategy => strategy.Execute()).Returns(_message.Object).Verifiable();
 
-        _interpretCmd.Setup(x => x.Execute()).Verifiable();
+        _interpretCmd.Setup(cmd => cmd.Execute()).Verifiable();
 
-        _getInterpretateMessageCommand.Setup(x => x.Execute(It.IsAny<object[]>())).Throws<InvalidCastException>().Verifiable();
+        _getInterpretateMessageCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Throws<InvalidCastException>().Verifiable();
 
 
         MessageProcessing msgProcess = new MessageProcessing();
@@ -397,29 +413,29 @@ public class MessageProcessingTest
 
         Assert.Throws<InvalidCastException>(act);
 
-        _getMessage.Verify(getMsg => getMsg.Execute(), Times.Exactly(1));
+        _getMessage.Verify(strategy => strategy.Execute(), Times.Exactly(1));
 
         object[] expectArgs = new object[] { _message.Object };
-        _getInterpretateMessageCommand.Verify(x => x.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+        _getInterpretateMessageCommand.Verify(strategy => strategy.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
 
-        _message.VerifyGet<string>(x => x.gameId, Times.Exactly(1));
+        _message.VerifyGet<string>(strategy => strategy.gameId, Times.Never());
 
-        _interpretCmd.Verify(x => x.Execute(), Times.Never());
+        _interpretCmd.Verify(cmd => cmd.Execute(), Times.Never());
     }
 
     // Scenario 11
     [Fact]
     public void SendCommandInGameReturnsNonTypeICommand()
     {
-        _message.SetupGet(msg => msg.gameId).Returns(gameIdCorrect).Verifiable();
+        _message.SetupGet(strategy => strategy.gameId).Returns(gameIdCorrect).Verifiable();
 
-        _getMessage.Setup(getMsg => getMsg.Execute()).Returns(_message.Object).Verifiable();
+        _getMessage.Setup(strategy => strategy.Execute()).Returns(_message.Object).Verifiable();
 
-        _interpretCmd.Setup(x => x.Execute()).Verifiable();
+        _interpretCmd.Setup(cmd => cmd.Execute()).Verifiable();
 
-        _getInterpretateMessageCommand.Setup(x => x.Execute(It.IsAny<object[]>())).Returns(_interpretCmd.Object).Verifiable();
+        _getInterpretateMessageCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(_interpretCmd.Object).Verifiable();
 
-        _sendCommandInGame.Setup(sendCmd => sendCmd.Execute(It.IsAny<object[]>())).Throws<InvalidCastException>().Verifiable();
+        _sendCommandInGame.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Throws<InvalidCastException>().Verifiable();
 
 
         MessageProcessing msgProcess = new MessageProcessing();
@@ -429,16 +445,55 @@ public class MessageProcessingTest
 
         Assert.Throws<InvalidCastException>(act);
 
-        _getMessage.Verify(getMsg => getMsg.Execute(), Times.Exactly(1));
+        _getMessage.Verify(strategy => strategy.Execute(), Times.Exactly(1));
 
         object[] expectArgs = new object[] { _message.Object };
-        _getInterpretateMessageCommand.Verify(x => x.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+        _getInterpretateMessageCommand.Verify(strategy => strategy.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
 
-        _sendCommandInGame.Verify(sendCmd => sendCmd.Execute(It.Is<object[]>(
+        _sendCommandInGame.Verify(strategy => strategy.Execute(It.Is<object[]>(
             factArg => (string)factArg[0] == gameIdCorrect && factArg[1] == _interpretCmd.Object)), Times.Exactly(1));
 
-        _message.VerifyGet<string>(x => x.gameId, Times.Exactly(1));
+        _message.VerifyGet<string>(strategy => strategy.gameId, Times.Exactly(1));
 
-        _interpretCmd.Verify(x => x.Execute(), Times.Never());
+        _interpretCmd.Verify(cmd => cmd.Execute(), Times.Never());
+    }
+
+    // Scenario 12
+    [Fact]
+        public void SendCmdReturnsException()
+    {
+        _message.SetupGet(strategy => strategy.gameId).Returns(gameIdCorrect).Verifiable();
+
+        _getMessage.Setup(strategy => strategy.Execute()).Returns(_message.Object).Verifiable();
+
+        _interpretCmd.Setup(cmd => cmd.Execute()).Verifiable();
+
+        _sendCmd.Setup(cmd => cmd.Execute()).Throws<InvalidOperationException>().Verifiable();
+
+        _getInterpretateMessageCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(_interpretCmd.Object).Verifiable();
+
+        _sendCommandInGame.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(_sendCmd.Object).Verifiable();
+
+
+        MessageProcessing msgProcess = new MessageProcessing();
+
+        var act = () => msgProcess.Execute();
+
+
+        Assert.Throws<InvalidOperationException>(act);
+
+        _getMessage.Verify(strategy => strategy.Execute(), Times.Exactly(1));
+
+        object[] expectArgs = new object[] { _message.Object };
+        _getInterpretateMessageCommand.Verify(strategy => strategy.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+
+        _sendCommandInGame.Verify(strategy => strategy.Execute(It.Is<object[]>(
+            factArg => (string)factArg[0] == gameIdCorrect && factArg[1] == _interpretCmd.Object)), Times.Exactly(1));
+
+        _message.VerifyGet<string>(strategy => strategy.gameId, Times.Exactly(1));
+
+        _sendCmd.Verify(cmd => cmd.Execute(), Times.Exactly(1));
+
+        _interpretCmd.Verify(cmd => cmd.Execute(), Times.Never());
     }
 }
