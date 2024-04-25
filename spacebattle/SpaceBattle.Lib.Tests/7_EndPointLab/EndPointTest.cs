@@ -8,7 +8,7 @@ namespace SpaceBattle.Lib.Tests;
 public class EndPointTest
 {
     private readonly Mock<IStrategy> _getThreadIDByGameID = new();
-    private readonly Mock<ICommand> _createFromMesssageCmd = new();
+    private readonly Mock<IStrategy> _createFromMesssageCmd = new();
     private readonly Mock<ICommand> _sendCmd = new();
     private readonly List<MessageContract> _messagesList = new();
 
@@ -25,9 +25,13 @@ public class EndPointTest
             (object[] args) => _getThreadIDByGameID.Object.Execute(args)
         ).Execute();
 
+        _createFromMesssageCmd.Setup(
+            cmd => cmd.Execute(It.IsAny<object[]>())
+        ).Returns(new ActionCommand(() => { }));
+
         IoC.Resolve<ICommand>(
             "IoC.Register", "Command.CreateFromMessage",
-            (object[] args) => _createFromMesssageCmd.Object
+            (object[] args) => _createFromMesssageCmd.Object.Execute(args)
         ).Execute();
 
         IoC.Resolve<ICommand>(
@@ -98,6 +102,26 @@ public class EndPointTest
         ).Returns(threadID);
 
         _sendCmd.Setup(cmd => cmd.Execute()).Throws<Exception>().Verifiable();
+
+        var webApi = new WebApi();
+
+        var processMessagesCmd = new ActionCommand(() =>
+            { _messagesList.ForEach(webApi.ProcessMessage); });
+
+        Assert.Throws<Exception>(processMessagesCmd.Execute);
+    }
+
+    [Fact]
+    public void Impossible_To_Create_Command_From_Message()
+    {
+        var threadID = "thread512";
+        _getThreadIDByGameID.Setup(
+            cmd => cmd.Execute(It.IsAny<string>())
+        ).Returns(threadID);
+
+        _createFromMesssageCmd.Setup(
+            cmd => cmd.Execute(It.IsAny<object[]>())
+        ).Throws<Exception>();
 
         var webApi = new WebApi();
 
