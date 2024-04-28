@@ -28,68 +28,6 @@ public class InterpretateCommandTests
         ).Execute();
     }
 
-// _sendCmd лег
-
-/*
-        Сценарий 1 - GetCommand - null:
-    Нужно Mock<IStrategy> для GetCommand, что null
-    Необходимо Mock положить в IoC
-    Вызываем команду и выполняем её
-    Ожидаем исключение
-
-        Сценарий 2 - GetCommand вызывает Exception:
-    Нужно Mock<IStrategy> для GetCommand, который вызывает Exception
-    Необходимо Mock положить в IoC
-    Вызываем команду и выполняем её
-    Ожидаем исключение
-
-        Сценарий 3 - GetCommand - не null, SendCommandInGame - null:
-    Нужно Mock<Istrategy> для GetCommand , что не null, и Mock<ICommand> для GetCommand, и Mock<IStrategy> для SendCommandInGame - null, 
-    Необходимо, чтобы Mock<Istrategy> GetCommand вернул Mock<ICommand>
-    положить в IoC Mock<Istrategy>
-    Вызываем команду и выполняем её
-    Ожидаем исключение
-
-        Сценарий 4 - GetCommand - не null, SendCommandInGame вызывает Exception:
-    Нужно Mock<Istrategy> для GetCommand , что не null, и Mock<ICommand> для GetCommand, и Mock<IStrategy> для SendCommandInGame вызывает Exception, 
-    Необходимо, чтобы Mock<Istrategy> GetCommand вернул Mock<ICommand>
-    положить в IoC Mock<Istrategy>
-    Вызываем команду и выполняем её
-    Ожидаем исключение
-
-        Сценарий 5 - GetCommand - не null, SendCommandInGame - не null:
-    Нужно Mock<Istrategy> для GetCommand , что не null, и Mock<ICommand> для GetCommand,  
-        и Mock<Istrategy> для SendCommandInGame , что не null, и Mock<ICommand> для SendCommandInGame
-    Необходимо, чтобы Mock<Istrategy> GetCommand вернул Mock<ICommand>, Mock<Istrategy> для SendCommandInGame должен вернуть Mock<ICommand>
-    положить в IoC Mock<Istrategy>
-    Вызываем команду и выполняем её
-    Ожидаем, что GetCommand вызовется 1 раз и SendCommandInGame 1 раз и у ICommand 2 раза
-
-        Сценарий 6 - GetCommand возвращает не ICommand:
-    Нужно Mock<IStrategy> для GetCommand возвращает не ICommand
-    Необходимо Mock положить в IoC
-    Вызываем команду и выполняем её
-    Ожидаем исключение
-
-        Сценарий 7 - SendCommand возвращает не ICommand
-    Нужно Mock<Istrategy> для GetCommand , что не null, и Mock<ICommand> для GetCommand, 
-        и Mock<IStrategy> для SendCommandInGame возвращает не ICommand, 
-    Необходимо, чтобы Mock<Istrategy> GetCommand вернул Mock<ICommand>
-    положить в IoC Mock<Istrategy>
-    Вызываем команду и выполняем её
-    Ожидаем исключение
-
-        Сценарий 8 - sendCmd не выполнился
-    Нужно Mock<Istrategy> для GetCommand , что не null, и Mock<ICommand> для GetCommand,  
-        и Mock<Istrategy> для SendCommandInGame , что не null, и Mock<ICommand> для SendCommandInGame
-    Необходимо, чтобы Mock<Istrategy> GetCommand вернул Mock<ICommand>, Mock<Istrategy> для SendCommandInGame должен вернуть Mock<ICommand>
-    положить в IoC Mock<Istrategy>
-    Вызываем команду и выполняем её
-    Ожидаем, что GetCommand вызовется 1 раз и SendCommandInGame 1 раз и у ICommand 2 раза
-
-*/
-
-    // Scenario 1
     [Fact]
     public void GetCommandReturnsNull()
     {
@@ -107,7 +45,6 @@ public class InterpretateCommandTests
         _getCommand.Verify(strategy => strategy.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
     }
 
-    // Scenario 2
     [Fact]
     public void CetCommandReturnsException()
     {
@@ -125,7 +62,6 @@ public class InterpretateCommandTests
         _getCommand.Verify(strategy => strategy.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
     }
 
-    // Scenario 3
     [Fact]
     public void SendCommandInGameReturnsNull()
     {
@@ -154,7 +90,6 @@ public class InterpretateCommandTests
         _getCmd.Verify(cmd => cmd.Execute(), Times.Never());
     }
 
-    // Scenario 4
     [Fact]
     public void SendCommandInGameReturnsException()
     {
@@ -182,7 +117,6 @@ public class InterpretateCommandTests
         
     }
 
-    // Scenario 5
     [Fact]
     public void SuccessfulInterpretateCommand()
     {
@@ -220,7 +154,6 @@ public class InterpretateCommandTests
         _getCmd.Verify(cmd => cmd.Execute(), Times.Never());
     }
 
-    //Scenario 6
     [Fact]
     public void GetCommandReturnsNonTypeICommand()
     {
@@ -238,7 +171,6 @@ public class InterpretateCommandTests
         _getCommand.Verify(strategy => strategy.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
     }
 
-    //Scenario 7
     [Fact]
     public void SendCommandInGameReturnsNonTypeICommand()
     {
