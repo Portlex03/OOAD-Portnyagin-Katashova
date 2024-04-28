@@ -17,12 +17,12 @@ public class MessageProcessing : ICommand
         // 2 mock - Mock<IStrategy> для GetInterpretateMessageCommand, что не null
         // 3 mock - Mock<IStrategy> для GetInterpretateMessageCommand вызывает Exception
         // 4 mock - Mock<ICommand>
-        ICommand cmd = IoC.Resolve<ICommand>("SendCommandInGame", message.gameId, interpretcmd) ?? throw new NullCommandException(); // 4 mock
+        ICommand sendCmd = IoC.Resolve<ICommand>("SendCommandInGame", message.gameId, interpretcmd) ?? throw new NullCommandException(); // 4 mock
         // 1 mock - Mock<IStrategy> для SendCommandInGame, что null
         // 2 mock - Mock<Istrategy> для SendCommandInGame , что не null
         // 3 mock - Mock<ICommand>
         // 4 mock - Mock<IStrategy> SendCommandInGame, который вызывает Exception
-        cmd.Execute(); 
+        sendCmd.Execute(); 
     }
 }
 

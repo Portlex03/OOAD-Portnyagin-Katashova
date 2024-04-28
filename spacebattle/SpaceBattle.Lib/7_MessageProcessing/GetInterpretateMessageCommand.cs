@@ -15,7 +15,7 @@ public class GetInterpretateMessageCommand : IStrategy
 
 /*
         Сценарий 1 - переданный args - пустой:
-    Нужно args - null
+    Нужно args - empty
     Ожидаем исключение
 
         Сценарий 2 - args[0] не является IMessage:
