@@ -11,7 +11,7 @@ public class TestStrategy
     {
         new InitScopeBasedIoCImplementationCommand().Execute();
 
-        IoC.Resolve<ICommand>("Scopes.Current.Set", 
+        IoC.Resolve<ICommand>("Scopes.Current.Set",
             IoC.Resolve<object>("Scopes.New", IoC.Resolve<object>("Scopes.Root"))
         ).Execute();
 
@@ -27,7 +27,7 @@ public class TestStrategy
 
         var act = () => _getInterpretateMessageCommand.Execute(nullArgs);
 
-        Assert.Throws<IndexOutOfRangeException> (act);
+        Assert.Throws<IndexOutOfRangeException>(act);
     }
 
     [Fact]
@@ -35,9 +35,9 @@ public class TestStrategy
     {
         object[] args = new object[1] { 1 };
 
-        var act = () => _getInterpretateMessageCommand.Execute (args);
+        var act = () => _getInterpretateMessageCommand.Execute(args);
 
-        Assert.Throws<InvalidCastException> (act);
+        Assert.Throws<InvalidCastException>(act);
     }
 
     [Fact]

@@ -7,5 +7,5 @@ public class NullCommandException : Exception
 
 public class NullMessageException : Exception
 {
-    
+
 }

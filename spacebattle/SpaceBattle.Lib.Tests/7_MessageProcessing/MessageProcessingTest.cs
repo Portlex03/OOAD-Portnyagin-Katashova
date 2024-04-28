@@ -19,11 +19,11 @@ public class MessageProcessingTest
     {
         new InitScopeBasedIoCImplementationCommand().Execute();
 
-        IoC.Resolve<ICommand>("Scopes.Current.Set", 
+        IoC.Resolve<ICommand>("Scopes.Current.Set",
             IoC.Resolve<object>("Scopes.New", IoC.Resolve<object>("Scopes.Root"))
         ).Execute();
 
-        IoC.Resolve<ICommand>("IoC.Register", "GetMessage", 
+        IoC.Resolve<ICommand>("IoC.Register", "GetMessage",
             (object[] args) => _getMessage.Object.Execute(args)
         ).Execute();
 

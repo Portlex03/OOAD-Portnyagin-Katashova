@@ -9,13 +9,14 @@ public class InterpretateCommandTests
     private readonly Mock<IMessage> _message = new();
     private readonly Mock<IStrategy> _sendCommandInGame = new();
     private readonly Mock<ICommand> _sendCmd = new();
-    private readonly Mock<IStrategy> _getCommand = new(); 
+    private readonly Mock<IStrategy> _getCommand = new();
     private readonly Mock<ICommand> _getCmd = new();
+
     public InterpretateCommandTests()
     {
         new InitScopeBasedIoCImplementationCommand().Execute();
 
-        IoC.Resolve<ICommand>("Scopes.Current.Set", 
+        IoC.Resolve<ICommand>("Scopes.Current.Set",
             IoC.Resolve<object>("Scopes.New", IoC.Resolve<object>("Scopes.Root"))
         ).Execute();
 
@@ -66,7 +67,7 @@ public class InterpretateCommandTests
     public void SendCommandInGameReturnsNull()
     {
         _message.SetupGet(strategy => strategy.gameId).Returns(gameId).Verifiable();
-        
+
         _getCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(_getCmd.Object).Verifiable();
 
         _getCmd.Setup(cmd => cmd.Execute()).Verifiable();
@@ -114,14 +115,13 @@ public class InterpretateCommandTests
             factArg => (string)factArg[0] == gameId && factArg[1] == _getCmd.Object)), Times.Exactly(1));
 
         _getCmd.Verify(cmd => cmd.Execute(), Times.Never());
-        
     }
 
     [Fact]
     public void SuccessfulInterpretateCommand()
     {
         _message.SetupGet(strategy => strategy.gameId).Returns(gameId).Verifiable();
-           
+
         _getCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(_getCmd.Object).Verifiable();
 
         _sendCommandInGame.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(_sendCmd.Object).Verifiable();
@@ -201,7 +201,7 @@ public class InterpretateCommandTests
     public void SendCmdReturnsException()
     {
         _message.SetupGet(strategy => strategy.gameId).Returns(gameId).Verifiable();
-           
+
         _getCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(_getCmd.Object).Verifiable();
 
         _sendCommandInGame.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(_sendCmd.Object).Verifiable();

@@ -10,6 +10,7 @@ public class InterpretateCommand : ICommand
     {
         _message = message ?? throw new NullMessageException();
     }
+
     public void Execute()
     {
         ICommand getCmd = IoC.Resolve<ICommand>("GetCommand", _message) ?? throw new NullCommandException();

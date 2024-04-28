@@ -11,6 +11,6 @@ public class MessageProcessing : ICommand
 
         ICommand sendCmd = IoC.Resolve<ICommand>("SendCommandInGame", message.gameId, interpretcmd) ?? throw new NullCommandException();
 
-        sendCmd.Execute(); 
+        sendCmd.Execute();
     }
 }

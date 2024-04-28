@@ -5,6 +5,6 @@ public class GetInterpretateMessageCommand : IStrategy
 {
     public object Execute(params object[] args)
     {
-        return new InterpretateCommand((IMessage) args[0]); 
+        return new InterpretateCommand((IMessage)args[0]);
     }
 }
