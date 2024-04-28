@@ -460,7 +460,7 @@ public class MessageProcessingTest
 
     // Scenario 12
     [Fact]
-        public void SendCmdReturnsException()
+    public void SendCmdReturnsException()
     {
         _message.SetupGet(strategy => strategy.gameId).Returns(gameIdCorrect).Verifiable();
 
@@ -497,3 +497,7 @@ public class MessageProcessingTest
         _interpretCmd.Verify(cmd => cmd.Execute(), Times.Never());
     }
 }
+
+
+// cmd лег
+
