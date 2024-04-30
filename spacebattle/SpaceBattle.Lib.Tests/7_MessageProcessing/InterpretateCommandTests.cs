@@ -11,6 +11,7 @@ public class InterpretateCommandTests
     private readonly Mock<ICommand> _sendCmd = new();
     private readonly Mock<IStrategy> _getCommand = new();
     private readonly Mock<ICommand> _getCmd = new();
+    private readonly int? NULL = null;
 
     public InterpretateCommandTests()
     {
@@ -32,7 +33,7 @@ public class InterpretateCommandTests
     [Fact]
     public void GetCommandReturnsNull()
     {
-        _getCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(null).Verifiable();
+        _getCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(null!).Verifiable();
 
 
         InterpretateCommand interCmd = new InterpretateCommand(_message.Object);
@@ -72,7 +73,7 @@ public class InterpretateCommandTests
 
         _getCmd.Setup(cmd => cmd.Execute()).Verifiable();
 
-        _sendCommandInGame.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(null).Verifiable();
+        _sendCommandInGame.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(null!).Verifiable();
 
 
         InterpretateCommand interCmd = new InterpretateCommand(_message.Object);
@@ -230,6 +231,6 @@ public class InterpretateCommandTests
     [Fact]
     public void NotCreateObjectOfInterpretateCommand()
     {
-        Assert.Throws<NullMessageException>(() => new InterpretateCommand(null));
+        Assert.Throws<NullMessageException>(() => new InterpretateCommand(null!));
     }
 }

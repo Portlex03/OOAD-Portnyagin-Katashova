@@ -39,7 +39,7 @@ public class MessageProcessingTest
     [Fact]
     public void GetMessageReturnsNull()
     {
-        _getMessage.Setup(strategy => strategy.Execute()).Returns(null).Verifiable();
+        _getMessage.Setup(strategy => strategy.Execute()).Returns(null!).Verifiable();
 
 
         MessageProcessing msgProcess = new MessageProcessing();
@@ -113,7 +113,7 @@ public class MessageProcessingTest
 
         _getInterpretateMessageCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(_interpretCmd.Object).Verifiable();
 
-        _sendCommandInGame.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(null).Verifiable();
+        _sendCommandInGame.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(null!).Verifiable();
 
 
         MessageProcessing msgProcess = new MessageProcessing();
@@ -163,7 +163,7 @@ public class MessageProcessingTest
         }
         catch (Exception ex)
         {
-            Assert.Fail("Test should be performed without exceptions");
+            Assert.Fail("Test should be performed without exceptions" + ex.Message);
         }
 
         _getMessage.Verify(strategy => strategy.Execute(), Times.Exactly(1));
@@ -224,7 +224,7 @@ public class MessageProcessingTest
 
         _interpretCmd.Setup(cmd => cmd.Execute()).Verifiable();
 
-        _getInterpretateMessageCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(null).Verifiable();
+        _getInterpretateMessageCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(null!).Verifiable();
 
 
         MessageProcessing msgProcess = new MessageProcessing();
