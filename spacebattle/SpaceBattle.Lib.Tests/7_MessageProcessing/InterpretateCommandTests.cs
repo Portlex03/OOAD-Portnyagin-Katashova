@@ -11,7 +11,6 @@ public class InterpretateCommandTests
     private readonly Mock<ICommand> _sendCmd = new();
     private readonly Mock<IStrategy> _getCommand = new();
     private readonly Mock<ICommand> _getCmd = new();
-    private readonly int? NULL = null;
 
     public InterpretateCommandTests()
     {
