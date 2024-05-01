@@ -7,10 +7,10 @@ namespace SpaceBattle.Lib.Tests;
 
 public class EndPointTest
 {
-    private readonly Mock<IStrategy> _getThreadIDByGameID = new();
-    private readonly Mock<IStrategy> _createFromMesssageCmd = new();
-    private readonly Mock<ICommand> _sendCmd = new();
-    private readonly List<MessageContract> _messagesList = new();
+    private readonly Mock<IStrategy> _getThreadIDByGameID;
+    private readonly Mock<IStrategy> _createFromMesssageCmd;
+    private readonly Mock<ICommand> _sendCmd;
+    private readonly List<MessageContract> _messagesList;
 
     public EndPointTest()
     {
@@ -20,11 +20,13 @@ public class EndPointTest
             IoC.Resolve<object>("Scopes.New", IoC.Resolve<object>("Scopes.Root"))
         ).Execute();
 
+        _getThreadIDByGameID = new();
         IoC.Resolve<ICommand>(
             "IoC.Register", "Game.GetThreadIDByGameID",
             (object[] args) => _getThreadIDByGameID.Object.Execute(args)
         ).Execute();
 
+        _createFromMesssageCmd = new();
         _createFromMesssageCmd.Setup(
             cmd => cmd.Execute(It.IsAny<object[]>())
         ).Returns(new ActionCommand(() => { }));
@@ -34,6 +36,7 @@ public class EndPointTest
             (object[] args) => _createFromMesssageCmd.Object.Execute(args)
         ).Execute();
 
+        _sendCmd = new();
         IoC.Resolve<ICommand>(
             "IoC.Register", "Thread.SendCmd",
             (object[] args) => _sendCmd.Object
