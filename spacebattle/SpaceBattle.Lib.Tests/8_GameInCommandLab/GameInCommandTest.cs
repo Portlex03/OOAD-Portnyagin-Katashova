@@ -6,7 +6,7 @@ using Moq;
 public class GameInCommandTest
 {
     readonly object _scope;
-    readonly Mock<IStrategy> _getQuantCmd = new();
+    readonly Mock<IStrategy> _getQuantCmd;
 
     public GameInCommandTest()
     {
@@ -15,6 +15,7 @@ public class GameInCommandTest
         _scope = IoC.Resolve<object>("Scopes.New", IoC.Resolve<object>("Scopes.Root"));
         IoC.Resolve<ICommand>("Scopes.Current.Set", _scope).Execute();
 
+        _getQuantCmd = new();
         IoC.Resolve<ICommand>(
             "IoC.Register", "Game.Quant",
             (object[] args) => _getQuantCmd.Object.Execute()
@@ -69,5 +70,22 @@ public class GameInCommandTest
         gameAsCommand.Execute();
 
         Assert.True(q.Count == 2);
+    }
+
+    [Fact]
+    public void Impossible_To_Get_Quant()
+    {
+        var cmd = new Mock<ICommand>();
+
+        var q = new Queue<ICommand>();
+        q.Enqueue(cmd.Object);
+        q.Enqueue(cmd.Object);
+
+        var gameAsCommand = new GameAsCommand(
+            IoC.Resolve<object>("Scopes.New", _scope), q);
+
+        _getQuantCmd.Setup(cmd => cmd.Execute()).Throws<Exception>();
+
+        Assert.Throws<Exception>(gameAsCommand.Execute);
     }
 }
