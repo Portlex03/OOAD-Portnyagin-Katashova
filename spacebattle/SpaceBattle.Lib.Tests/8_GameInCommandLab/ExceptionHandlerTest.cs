@@ -6,10 +6,9 @@ using Moq;
 public class ExceptionHandlerTest
 {
     readonly object _scope;
-    readonly Mock<IStrategy> _getQuantCmd = new();
-    readonly Dictionary<object, object> _exHandlerDict = new();
-    readonly Mock<ICommand> _exHandler = new();
-    readonly Mock<ICommand> _defaultExHandler = new();
+    readonly Mock<IStrategy> _getQuantCmd;
+    readonly Dictionary<object, object> _exHandlerDict;
+    readonly Mock<ICommand> _suitableStrategy;
 
     public ExceptionHandlerTest()
     {
@@ -18,25 +17,28 @@ public class ExceptionHandlerTest
         _scope = IoC.Resolve<object>("Scopes.New", IoC.Resolve<object>("Scopes.Root"));
         IoC.Resolve<ICommand>("Scopes.Current.Set", _scope).Execute();
 
+        _getQuantCmd = new();
         IoC.Resolve<ICommand>(
             "IoC.Register", "Game.Quant",
             (object[] args) => _getQuantCmd.Object.Execute()
         ).Execute();
 
+        _exHandlerDict = new();
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "Exception.Tree",
+            (object[] args) => _exHandlerDict
+        ).Execute();
+
+        _suitableStrategy = new(); // "подходящая стратегия"
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "Exception.SuitableStrategy",
+            (object[] args) => _suitableStrategy.Object
+        ).Execute();
+
         IoC.Resolve<ICommand>(
             "IoC.Register", "Exception.Handler",
-            (object[] args) =>
-            {
-                var ex = (Exception)args[0];
-                var cmd = (ICommand)args[1];
-
-                if (_exHandlerDict.ContainsKey(cmd))
-                    return _exHandler.Object;
-
-                ex.Data["Command"] = cmd;
-                _defaultExHandler.Setup(cmd => cmd.Execute()).Throws(ex).Verifiable();
-                return _defaultExHandler.Object;
-            }
+            (object[] args) => new ExceptionHandlerCmd(
+                (Exception)args[0], (ICommand)args[1])
         ).Execute();
     }
 
@@ -61,7 +63,6 @@ public class ExceptionHandlerTest
 
         Assert.Throws<Exception>(gameAsCommand.Execute);
         exCmd.Verify(cmd => cmd.Execute(), Times.Once());
-        _defaultExHandler.Verify(cmd => cmd.Execute(), Times.Once);
     }
 
     [Fact]
@@ -86,7 +87,8 @@ public class ExceptionHandlerTest
         _getQuantCmd.Setup(cmd => cmd.Execute()).Returns(quant);
 
         gameAsCommand.Execute();
+
         exCmd.Verify(cmd => cmd.Execute(), Times.Once());
-        _exHandler.Verify(cmd => cmd.Execute(), Times.Once());
+        _suitableStrategy.Verify(cmd => cmd.Execute(), Times.Once());
     }
 }
