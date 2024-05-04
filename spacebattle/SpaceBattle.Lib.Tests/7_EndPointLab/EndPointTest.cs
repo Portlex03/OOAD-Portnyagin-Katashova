@@ -23,17 +23,17 @@ public class EndPointTest
         _getThreadIDByGameID = new();
         IoC.Resolve<ICommand>(
             "IoC.Register", "Game.GetThreadIDByGameID",
-            (object[] args) => _getThreadIDByGameID.Object.Execute(args)
+            (object[] args) => _getThreadIDByGameID.Object.Invoke(args)
         ).Execute();
 
         _createFromMesssageCmd = new();
         _createFromMesssageCmd.Setup(
-            cmd => cmd.Execute(It.IsAny<object[]>())
+            cmd => cmd.Invoke(It.IsAny<object[]>())
         ).Returns(new ActionCommand(() => { }));
 
         IoC.Resolve<ICommand>(
             "IoC.Register", "Command.CreateFromMessage",
-            (object[] args) => _createFromMesssageCmd.Object.Execute(args)
+            (object[] args) => _createFromMesssageCmd.Object.Invoke(args)
         ).Execute();
 
         _sendCmd = new();
@@ -72,7 +72,7 @@ public class EndPointTest
 
         var threadID = "thread64";
         _getThreadIDByGameID.Setup(
-            cmd => cmd.Execute(It.IsAny<string>())
+            cmd => cmd.Invoke(It.IsAny<string>())
         ).Returns(threadID);
 
         var webApi = new WebApi();
@@ -85,7 +85,7 @@ public class EndPointTest
     public void Impossible_To_Find_ThreadId_By_Game_Id()
     {
         _getThreadIDByGameID.Setup(
-            cmd => cmd.Execute(It.IsAny<string>())
+            cmd => cmd.Invoke(It.IsAny<string>())
         ).Throws<Exception>().Verifiable();
 
         var webApi = new WebApi();
@@ -101,7 +101,7 @@ public class EndPointTest
     {
         var threadID = "thread256";
         _getThreadIDByGameID.Setup(
-            cmd => cmd.Execute(It.IsAny<string>())
+            cmd => cmd.Invoke(It.IsAny<string>())
         ).Returns(threadID);
 
         _sendCmd.Setup(cmd => cmd.Execute()).Throws<Exception>().Verifiable();
@@ -119,11 +119,11 @@ public class EndPointTest
     {
         var threadID = "thread512";
         _getThreadIDByGameID.Setup(
-            cmd => cmd.Execute(It.IsAny<string>())
+            cmd => cmd.Invoke(It.IsAny<string>())
         ).Returns(threadID);
 
         _createFromMesssageCmd.Setup(
-            cmd => cmd.Execute(It.IsAny<object[]>())
+            cmd => cmd.Invoke(It.IsAny<object[]>())
         ).Throws<Exception>();
 
         var webApi = new WebApi();
