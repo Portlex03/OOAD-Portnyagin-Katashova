@@ -6,7 +6,6 @@ using Moq;
 public class GameInCommandTest
 {
     readonly object _scope;
-    readonly Mock<IStrategy> _getQuantCmd;
 
     public GameInCommandTest()
     {
@@ -14,17 +13,17 @@ public class GameInCommandTest
 
         _scope = IoC.Resolve<object>("Scopes.New", IoC.Resolve<object>("Scopes.Root"));
         IoC.Resolve<ICommand>("Scopes.Current.Set", _scope).Execute();
-
-        _getQuantCmd = new();
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "Game.Quant",
-            (object[] args) => _getQuantCmd.Object.Execute()
-        ).Execute();
     }
 
     [Fact]
     public void All_Commands_Execute_In_Game_Queue()
     {
+        var getQuantCmd = new Mock<IStrategy>();
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "Game.Quant",
+            (object[] args) => getQuantCmd.Object.Execute(args)
+        ).Execute();
+
         var cmd = new Mock<ICommand>();
 
         var q = new Queue<ICommand>();
@@ -37,7 +36,7 @@ public class GameInCommandTest
             IoC.Resolve<object>("Scopes.New", _scope), q);
 
         var quant = 50;
-        _getQuantCmd.Setup(cmd => cmd.Execute()).Returns(quant);
+        getQuantCmd.Setup(cmd => cmd.Execute()).Returns(quant);
 
         gameAsCommand.Execute();
 
@@ -47,11 +46,17 @@ public class GameInCommandTest
     [Fact]
     public void Commands_Executes_While_Time_Compliting_Less_Then_Quant()
     {
+        var getQuantCmd = new Mock<IStrategy>();
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "Game.Quant",
+            (object[] args) => getQuantCmd.Object.Execute(args)
+        ).Execute();
+
         var cmd = new Mock<ICommand>();
 
         var longTimeCmd = new Mock<ICommand>();
         longTimeCmd.Setup(cmd => cmd.Execute()).Callback(
-            () => { _getQuantCmd.Setup(cmd => cmd.Execute()).Returns(0); }
+            () => { getQuantCmd.Setup(cmd => cmd.Execute()).Returns(0); }
         ).Verifiable();
 
         var q = new Queue<ICommand>();
@@ -65,7 +70,7 @@ public class GameInCommandTest
             IoC.Resolve<object>("Scopes.New", _scope), q);
 
         var quant = 50;
-        _getQuantCmd.Setup(cmd => cmd.Execute()).Returns(quant);
+        getQuantCmd.Setup(cmd => cmd.Execute()).Returns(quant);
 
         gameAsCommand.Execute();
 
@@ -75,6 +80,12 @@ public class GameInCommandTest
     [Fact]
     public void Impossible_To_Get_Quant()
     {
+        var getQuantCmd = new Mock<IStrategy>();
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "Game.Quant",
+            (object[] args) => getQuantCmd.Object.Execute(args)
+        ).Execute();
+
         var cmd = new Mock<ICommand>();
 
         var q = new Queue<ICommand>();
@@ -84,7 +95,7 @@ public class GameInCommandTest
         var gameAsCommand = new GameAsCommand(
             IoC.Resolve<object>("Scopes.New", _scope), q);
 
-        _getQuantCmd.Setup(cmd => cmd.Execute()).Throws<Exception>();
+        getQuantCmd.Setup(cmd => cmd.Execute()).Throws<Exception>();
 
         Assert.Throws<Exception>(gameAsCommand.Execute);
     }
