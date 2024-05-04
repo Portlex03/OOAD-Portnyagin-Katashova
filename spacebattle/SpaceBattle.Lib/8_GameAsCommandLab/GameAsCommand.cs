@@ -18,12 +18,11 @@ public class GameAsCommand : ICommand
 
     public void Execute()
     {
+        _stopwatch.Reset();
         IoC.Resolve<ICommand>("Scopes.Current.Set", _scope).Execute();
-        while (_stopwatch.ElapsedMilliseconds <= IoC.Resolve<int>("Game.Quant"))
+        while (_q.Count > 0 && _stopwatch.ElapsedMilliseconds <= IoC.Resolve<int>("Game.Quant"))
         {
             _stopwatch.Start();
-            if (_q.Count == 0)
-                break;
             var cmd = _q.Dequeue();
             try
             {
@@ -35,6 +34,5 @@ public class GameAsCommand : ICommand
             }
             _stopwatch.Stop();
         }
-        _stopwatch.Reset();
     }
 }
