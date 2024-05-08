@@ -5,13 +5,6 @@ using Moq;
 
 public class InterpretateCommandTests
 {
-    // private readonly string gameId = "asdfg";
-    // private readonly Mock<IMessage> _message = new();
-    // private readonly Mock<IStrategy> _sendCommandInGame = new();
-    // private readonly Mock<ICommand> _sendCmd = new();
-    // private readonly Mock<IStrategy> _getCommand = new();
-    // private readonly Mock<ICommand> _getCmd = new();
-
     public InterpretateCommandTests()
     {
         new InitScopeBasedIoCImplementationCommand().Execute();
@@ -19,32 +12,7 @@ public class InterpretateCommandTests
         IoC.Resolve<ICommand>("Scopes.Current.Set",
             IoC.Resolve<object>("Scopes.New", IoC.Resolve<object>("Scopes.Root"))
         ).Execute();
-
-        // IoC.Resolve<ICommand>("IoC.Register", "SendCommandInGame",
-        //     (object[] args) => _sendCommandInGame.Object.Execute(args)
-        // ).Execute();
-
-        // IoC.Resolve<ICommand>("IoC.Register", "GetCommand",
-        //     (object[] args) => _getCommand.Object.Execute(args)
-        // ).Execute();
     }
-
-    // [Fact]
-    // public void GetCommandReturnsNull()
-    // {
-    //     _getCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(null!).Verifiable();
-
-
-    //     InterpretateCommand interCmd = new InterpretateCommand(_message.Object);
-
-    //     var act = () => interCmd.Execute();
-
-
-    //     Assert.Throws<NullCommandException>(act);
-
-    //     object[] expectArgs = new object[] { _message.Object };
-    //     _getCommand.Verify(strategy => strategy.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
-    // }
 
     [Fact]
     public void CetCommandReturnsException()
@@ -69,34 +37,6 @@ public class InterpretateCommandTests
         object[] expectArgs = new object[] { _message.Object };
         _getCommand.Verify(strategy => strategy.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
     }
-
-    // [Fact]
-    // public void SendCommandInGameReturnsNull()
-    // {
-    //     _message.SetupGet(strategy => strategy.gameId).Returns(gameId).Verifiable();
-
-    //     _getCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(_getCmd.Object).Verifiable();
-
-    //     _getCmd.Setup(cmd => cmd.Execute()).Verifiable();
-
-    //     _sendCommandInGame.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(null!).Verifiable();
-
-
-    //     InterpretateCommand interCmd = new InterpretateCommand(_message.Object);
-
-    //     var act = () => interCmd.Execute();
-
-
-    //     Assert.Throws<NullCommandException>(act);
-
-    //     object[] expectArgs = new object[] { _message.Object };
-    //     _getCommand.Verify(strategy => strategy.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
-
-    //     _sendCommandInGame.Verify(strategy => strategy.Execute(It.Is<object[]>(
-    //         factArg => (string)factArg[0] == gameId && factArg[1] == _getCmd.Object)), Times.Exactly(1));
-
-    //     _getCmd.Verify(cmd => cmd.Execute(), Times.Never());
-    // }
 
     [Fact]
     public void SendCommandInGameReturnsException()
@@ -300,10 +240,4 @@ public class InterpretateCommandTests
 
         _getCmd.Verify(cmd => cmd.Execute(), Times.Never());
     }
-
-    // [Fact]
-    // public void NotCreateObjectOfInterpretateCommand()
-    // {
-    //     Assert.Throws<NullMessageException>(() => new InterpretateCommand(null!));
-    // }
 }
