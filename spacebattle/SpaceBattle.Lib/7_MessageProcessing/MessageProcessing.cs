@@ -5,11 +5,11 @@ public class MessageProcessing : ICommand
 {
     public void Execute()
     {
-        IMessage message = IoC.Resolve<IMessage>("GetMessage") ?? throw new NullCommandException();
+        IMessage message = IoC.Resolve<IMessage>("GetMessage");
 
-        ICommand interpretcmd = IoC.Resolve<ICommand>("GetInterpretateMessageCommand", message) ?? throw new NullCommandException();
+        ICommand interpretcmd = IoC.Resolve<ICommand>("GetInterpretateMessageCommand", message);
 
-        ICommand sendCmd = IoC.Resolve<ICommand>("SendCommandInGame", message.gameId, interpretcmd) ?? throw new NullCommandException();
+        ICommand sendCmd = IoC.Resolve<ICommand>("SendCommandInGame", message.gameId, interpretcmd);
 
         sendCmd.Execute();
     }
