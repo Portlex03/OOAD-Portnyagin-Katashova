@@ -5,8 +5,6 @@ using Moq;
 
 public class TestStrategy
 {
-    private readonly GetInterpretateMessageCommand _getInterpretateMessageCommand = new();
-    private readonly Mock<IMessage> _messageMock = new();
     public TestStrategy()
     {
         new InitScopeBasedIoCImplementationCommand().Execute();
@@ -14,15 +12,17 @@ public class TestStrategy
         IoC.Resolve<ICommand>("Scopes.Current.Set",
             IoC.Resolve<object>("Scopes.New", IoC.Resolve<object>("Scopes.Root"))
         ).Execute();
-
-        IoC.Resolve<ICommand>("IoC.Register", "GetInterpretateMessageCommand",
-            (object[] args) => _getInterpretateMessageCommand.Execute(args)
-        ).Execute();
     }
 
     [Fact]
     public void ExplicitEmptyArray()
     {
+        GetInterpretateMessageCommand _getInterpretateMessageCommand = new();
+
+        IoC.Resolve<ICommand>("IoC.Register", "GetInterpretateMessageCommand",
+            (object[] args) => _getInterpretateMessageCommand.Execute(args)
+        ).Execute();
+
         object[] nullArgs = new object[0];
 
         var act = () => _getInterpretateMessageCommand.Execute(nullArgs);
@@ -33,6 +33,12 @@ public class TestStrategy
     [Fact]
     public void ArrayTypeIsNotIMessage()
     {
+        GetInterpretateMessageCommand _getInterpretateMessageCommand = new();
+
+        IoC.Resolve<ICommand>("IoC.Register", "GetInterpretateMessageCommand",
+            (object[] args) => _getInterpretateMessageCommand.Execute(args)
+        ).Execute();
+
         object[] args = new object[1] { 1 };
 
         var act = () => _getInterpretateMessageCommand.Execute(args);
@@ -43,6 +49,13 @@ public class TestStrategy
     [Fact]
     public void SuccessfulExecutionOfStrategy()
     {
+        GetInterpretateMessageCommand _getInterpretateMessageCommand = new();
+        Mock<IMessage> _messageMock = new();
+
+        IoC.Resolve<ICommand>("IoC.Register", "GetInterpretateMessageCommand",
+            (object[] args) => _getInterpretateMessageCommand.Execute(args)
+        ).Execute();
+
         object[] args = new object[1] { _messageMock.Object };
 
         var act = () => _getInterpretateMessageCommand.Execute(args);
