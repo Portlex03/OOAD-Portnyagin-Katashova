@@ -18,7 +18,7 @@ public class InterpretateCommandTests
     public void CetCommandReturnsException()
     {
         Mock<IMessage> _message = new();
-   
+
         Mock<IStrategy> _getCommand = new();
         IoC.Resolve<ICommand>("IoC.Register", "GetCommand",
             (object[] args) => _getCommand.Object.Execute(args)
@@ -46,7 +46,6 @@ public class InterpretateCommandTests
         Mock<IStrategy> _getCommand = new();
         Mock<ICommand> _getCmd = new();
         Mock<IStrategy> _sendCommandInGame = new();
-        
 
         IoC.Resolve<ICommand>("IoC.Register", "SendCommandInGame",
             (object[] args) => _sendCommandInGame.Object.Execute(args)

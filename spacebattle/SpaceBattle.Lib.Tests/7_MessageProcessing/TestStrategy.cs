@@ -71,7 +71,7 @@ public class TestStrategy
         IoC.Resolve<ICommand>("IoC.Register", "GetInterpretateMessageCommand",
             (object[] args) => _getInterpretateMessageCommand.Execute(args)
         ).Execute();
-        
+
         Assert.Throws<IndexOutOfRangeException>(() => IoC.Resolve<ICommand>("GetInterpretateMessageCommand"));
     }
 }
