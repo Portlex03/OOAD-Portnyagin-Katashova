@@ -7,9 +7,6 @@ namespace SpaceBattle.Lib.Tests;
 
 public class EndPointTest
 {
-    private readonly Mock<IStrategy> _getThreadIDByGameID;
-    private readonly Mock<IStrategy> _createFromMesssageCmd;
-    private readonly Mock<ICommand> _sendCmd;
     private readonly List<MessageContract> _messagesList;
 
     public EndPointTest()
@@ -18,28 +15,6 @@ public class EndPointTest
 
         IoC.Resolve<ICommand>("Scopes.Current.Set",
             IoC.Resolve<object>("Scopes.New", IoC.Resolve<object>("Scopes.Root"))
-        ).Execute();
-
-        _getThreadIDByGameID = new();
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "Game.GetThreadIDByGameID",
-            (object[] args) => _getThreadIDByGameID.Object.Invoke(args)
-        ).Execute();
-
-        _createFromMesssageCmd = new();
-        _createFromMesssageCmd.Setup(
-            cmd => cmd.Invoke(It.IsAny<object[]>())
-        ).Returns(new ActionCommand(() => { }));
-
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "Command.CreateFromMessage",
-            (object[] args) => _createFromMesssageCmd.Object.Invoke(args)
-        ).Execute();
-
-        _sendCmd = new();
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "Thread.SendCmd",
-            (object[] args) => _sendCmd.Object
         ).Execute();
 
         _messagesList = new List<MessageContract>()
@@ -68,24 +43,66 @@ public class EndPointTest
     [Fact]
     public void WebApi_Gets_Messages_And_Sends_It_To_Thread()
     {
-        _sendCmd.Setup(cmd => cmd.Execute()).Verifiable();
+        var getThreadIDByGameID = new Mock<IStrategy>();
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "Game.GetThreadIDByGameID",
+            (object[] args) => getThreadIDByGameID.Object.Execute(args)
+        ).Execute();
+
+        var createFromMesssageCmd = new Mock<IStrategy>();
+        createFromMesssageCmd.Setup(
+            cmd => cmd.Execute(It.IsAny<object[]>())
+        ).Returns(new ActionCommand(() => { }));
+
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "Command.CreateFromMessage",
+            (object[] args) => createFromMesssageCmd.Object.Execute(args)
+        ).Execute();
+
+        var sendCmd = new Mock<ICommand>();
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "Thread.SendCmd",
+            (object[] args) => sendCmd.Object
+        ).Execute();
 
         var threadID = "thread64";
-        _getThreadIDByGameID.Setup(
-            cmd => cmd.Invoke(It.IsAny<string>())
+        getThreadIDByGameID.Setup(
+            cmd => cmd.Execute(It.IsAny<string>())
         ).Returns(threadID);
 
         var webApi = new WebApi();
         _messagesList.ForEach(webApi.ProcessMessage);
 
-        _sendCmd.Verify(cmd => cmd.Execute(), Times.Exactly(_messagesList.Count));
+        sendCmd.Verify(cmd => cmd.Execute(), Times.Exactly(_messagesList.Count));
     }
 
     [Fact]
     public void Impossible_To_Find_ThreadId_By_Game_Id()
     {
-        _getThreadIDByGameID.Setup(
-            cmd => cmd.Invoke(It.IsAny<string>())
+        var getThreadIDByGameID = new Mock<IStrategy>();
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "Game.GetThreadIDByGameID",
+            (object[] args) => getThreadIDByGameID.Object.Execute(args)
+        ).Execute();
+
+        var createFromMesssageCmd = new Mock<IStrategy>();
+        createFromMesssageCmd.Setup(
+            cmd => cmd.Execute(It.IsAny<object[]>())
+        ).Returns(new ActionCommand(() => { }));
+
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "Command.CreateFromMessage",
+            (object[] args) => createFromMesssageCmd.Object.Execute(args)
+        ).Execute();
+
+        var sendCmd = new Mock<ICommand>();
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "Thread.SendCmd",
+            (object[] args) => sendCmd.Object
+        ).Execute();
+
+        getThreadIDByGameID.Setup(
+            cmd => cmd.Execute(It.IsAny<string>())
         ).Throws<Exception>().Verifiable();
 
         var webApi = new WebApi();
@@ -99,12 +116,34 @@ public class EndPointTest
     [Fact]
     public void Impossible_To_Send_EndPoint_Command_To_Thread()
     {
+        var getThreadIDByGameID = new Mock<IStrategy>();
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "Game.GetThreadIDByGameID",
+            (object[] args) => getThreadIDByGameID.Object.Execute(args)
+        ).Execute();
+
+        var createFromMesssageCmd = new Mock<IStrategy>();
+        createFromMesssageCmd.Setup(
+            cmd => cmd.Execute(It.IsAny<object[]>())
+        ).Returns(new ActionCommand(() => { }));
+
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "Command.CreateFromMessage",
+            (object[] args) => createFromMesssageCmd.Object.Execute(args)
+        ).Execute();
+
+        var sendCmd = new Mock<ICommand>();
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "Thread.SendCmd",
+            (object[] args) => sendCmd.Object
+        ).Execute();
+
         var threadID = "thread256";
-        _getThreadIDByGameID.Setup(
-            cmd => cmd.Invoke(It.IsAny<string>())
+        getThreadIDByGameID.Setup(
+            cmd => cmd.Execute(It.IsAny<string>())
         ).Returns(threadID);
 
-        _sendCmd.Setup(cmd => cmd.Execute()).Throws<Exception>().Verifiable();
+        sendCmd.Setup(cmd => cmd.Execute()).Throws<Exception>().Verifiable();
 
         var webApi = new WebApi();
 
@@ -117,13 +156,31 @@ public class EndPointTest
     [Fact]
     public void Impossible_To_Create_Command_From_Message()
     {
+        var getThreadIDByGameID = new Mock<IStrategy>();
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "Game.GetThreadIDByGameID",
+            (object[] args) => getThreadIDByGameID.Object.Execute(args)
+        ).Execute();
+
+        var createFromMesssageCmd = new Mock<IStrategy>();
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "Command.CreateFromMessage",
+            (object[] args) => createFromMesssageCmd.Object.Execute(args)
+        ).Execute();
+
+        var sendCmd = new Mock<ICommand>();
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "Thread.SendCmd",
+            (object[] args) => sendCmd.Object
+        ).Execute();
+
         var threadID = "thread512";
-        _getThreadIDByGameID.Setup(
-            cmd => cmd.Invoke(It.IsAny<string>())
+        getThreadIDByGameID.Setup(
+            cmd => cmd.Execute(It.IsAny<string>())
         ).Returns(threadID);
 
-        _createFromMesssageCmd.Setup(
-            cmd => cmd.Invoke(It.IsAny<object[]>())
+        createFromMesssageCmd.Setup(
+            cmd => cmd.Execute(It.IsAny<object[]>())
         ).Throws<Exception>();
 
         var webApi = new WebApi();
