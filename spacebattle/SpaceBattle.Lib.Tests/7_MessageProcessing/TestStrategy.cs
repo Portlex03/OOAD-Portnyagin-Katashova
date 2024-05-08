@@ -66,6 +66,12 @@ public class TestStrategy
     [Fact]
     public void ImplicitEmptyArray()
     {
+        GetInterpretateMessageCommand _getInterpretateMessageCommand = new();
+
+        IoC.Resolve<ICommand>("IoC.Register", "GetInterpretateMessageCommand",
+            (object[] args) => _getInterpretateMessageCommand.Execute(args)
+        ).Execute();
+        
         Assert.Throws<IndexOutOfRangeException>(() => IoC.Resolve<ICommand>("GetInterpretateMessageCommand"));
     }
 }
