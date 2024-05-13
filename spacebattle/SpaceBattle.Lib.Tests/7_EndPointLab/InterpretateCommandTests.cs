@@ -21,10 +21,10 @@ public class InterpretateCommandTests
 
         Mock<IStrategy> _getCommand = new();
         IoC.Resolve<ICommand>("IoC.Register", "GetCommand",
-            (object[] args) => _getCommand.Object.Execute(args)
+            (object[] args) => _getCommand.Object.Invoke(args)
         ).Execute();
 
-        _getCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Throws<InvalidOperationException>().Verifiable();
+        _getCommand.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Throws<InvalidOperationException>().Verifiable();
 
 
         InterpretateCommand interCmd = new InterpretateCommand(_message.Object);
@@ -35,7 +35,7 @@ public class InterpretateCommandTests
         Assert.Throws<InvalidOperationException>(act);
 
         object[] expectArgs = new object[] { _message.Object };
-        _getCommand.Verify(strategy => strategy.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+        _getCommand.Verify(strategy => strategy.Invoke(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
     }
 
     [Fact]
@@ -48,19 +48,19 @@ public class InterpretateCommandTests
         Mock<IStrategy> _sendCommandInGame = new();
 
         IoC.Resolve<ICommand>("IoC.Register", "SendCommandInGame",
-            (object[] args) => _sendCommandInGame.Object.Execute(args)
+            (object[] args) => _sendCommandInGame.Object.Invoke(args)
         ).Execute();
 
         IoC.Resolve<ICommand>("IoC.Register", "GetCommand",
-            (object[] args) => _getCommand.Object.Execute(args)
+            (object[] args) => _getCommand.Object.Invoke(args)
         ).Execute();
 
 
         _message.SetupGet(strategy => strategy.gameId).Returns(gameId).Verifiable();
 
-        _getCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(_getCmd.Object).Verifiable();
+        _getCommand.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Returns(_getCmd.Object).Verifiable();
 
-        _sendCommandInGame.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Throws<InvalidOperationException>().Verifiable();
+        _sendCommandInGame.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Throws<InvalidOperationException>().Verifiable();
 
 
         InterpretateCommand interCmd = new InterpretateCommand(_message.Object);
@@ -71,9 +71,9 @@ public class InterpretateCommandTests
         Assert.Throws<InvalidOperationException>(act);
 
         object[] expectArgs = new object[] { _message.Object };
-        _getCommand.Verify(strategy => strategy.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+        _getCommand.Verify(strategy => strategy.Invoke(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
 
-        _sendCommandInGame.Verify(strategy => strategy.Execute(It.Is<object[]>(
+        _sendCommandInGame.Verify(strategy => strategy.Invoke(It.Is<object[]>(
             factArg => (string)factArg[0] == gameId && factArg[1] == _getCmd.Object)), Times.Exactly(1));
 
         _getCmd.Verify(cmd => cmd.Execute(), Times.Never());
@@ -90,18 +90,18 @@ public class InterpretateCommandTests
         Mock<ICommand> _sendCmd = new();
 
         IoC.Resolve<ICommand>("IoC.Register", "SendCommandInGame",
-            (object[] args) => _sendCommandInGame.Object.Execute(args)
+            (object[] args) => _sendCommandInGame.Object.Invoke(args)
         ).Execute();
 
         IoC.Resolve<ICommand>("IoC.Register", "GetCommand",
-            (object[] args) => _getCommand.Object.Execute(args)
+            (object[] args) => _getCommand.Object.Invoke(args)
         ).Execute();
 
         _message.SetupGet(strategy => strategy.gameId).Returns(gameId).Verifiable();
 
-        _getCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(_getCmd.Object).Verifiable();
+        _getCommand.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Returns(_getCmd.Object).Verifiable();
 
-        _sendCommandInGame.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(_sendCmd.Object).Verifiable();
+        _sendCommandInGame.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Returns(_sendCmd.Object).Verifiable();
 
         _sendCmd.Setup(cmd => cmd.Execute()).Verifiable();
 
@@ -121,9 +121,9 @@ public class InterpretateCommandTests
         }
 
         object[] expectArgs = new object[] { _message.Object };
-        _getCommand.Verify(strategy => strategy.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+        _getCommand.Verify(strategy => strategy.Invoke(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
 
-        _sendCommandInGame.Verify(strategy => strategy.Execute(It.Is<object[]>(
+        _sendCommandInGame.Verify(strategy => strategy.Invoke(It.Is<object[]>(
             factArg => (string)factArg[0] == gameId && factArg[1] == _getCmd.Object)), Times.Exactly(1));
 
         _sendCmd.Verify(cmd => cmd.Execute(), Times.Exactly(1));
@@ -138,10 +138,10 @@ public class InterpretateCommandTests
         Mock<IStrategy> _getCommand = new();
 
         IoC.Resolve<ICommand>("IoC.Register", "GetCommand",
-            (object[] args) => _getCommand.Object.Execute(args)
+            (object[] args) => _getCommand.Object.Invoke(args)
         ).Execute();
 
-        _getCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Throws<InvalidCastException>().Verifiable();
+        _getCommand.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Throws<InvalidCastException>().Verifiable();
 
 
         InterpretateCommand interCmd = new InterpretateCommand(_message.Object);
@@ -152,7 +152,7 @@ public class InterpretateCommandTests
         Assert.Throws<InvalidCastException>(act);
 
         object[] expectArgs = new object[] { _message.Object };
-        _getCommand.Verify(strategy => strategy.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+        _getCommand.Verify(strategy => strategy.Invoke(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
     }
 
     [Fact]
@@ -165,18 +165,18 @@ public class InterpretateCommandTests
         Mock<IStrategy> _sendCommandInGame = new();
 
         IoC.Resolve<ICommand>("IoC.Register", "SendCommandInGame",
-            (object[] args) => _sendCommandInGame.Object.Execute(args)
+            (object[] args) => _sendCommandInGame.Object.Invoke(args)
         ).Execute();
 
         IoC.Resolve<ICommand>("IoC.Register", "GetCommand",
-            (object[] args) => _getCommand.Object.Execute(args)
+            (object[] args) => _getCommand.Object.Invoke(args)
         ).Execute();
 
         _message.SetupGet(strategy => strategy.gameId).Returns(gameId).Verifiable();
 
-        _getCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(_getCmd.Object).Verifiable();
+        _getCommand.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Returns(_getCmd.Object).Verifiable();
 
-        _sendCommandInGame.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Throws<InvalidCastException>().Verifiable();
+        _sendCommandInGame.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Throws<InvalidCastException>().Verifiable();
 
 
         InterpretateCommand interCmd = new InterpretateCommand(_message.Object);
@@ -187,9 +187,9 @@ public class InterpretateCommandTests
         Assert.Throws<InvalidCastException>(act);
 
         object[] expectArgs = new object[] { _message.Object };
-        _getCommand.Verify(strategy => strategy.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+        _getCommand.Verify(strategy => strategy.Invoke(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
 
-        _sendCommandInGame.Verify(strategy => strategy.Execute(It.Is<object[]>(
+        _sendCommandInGame.Verify(strategy => strategy.Invoke(It.Is<object[]>(
             factArg => (string)factArg[0] == gameId && factArg[1] == _getCmd.Object)), Times.Exactly(1));
 
         _getCmd.Verify(cmd => cmd.Execute(), Times.Never());
@@ -206,18 +206,18 @@ public class InterpretateCommandTests
         Mock<ICommand> _sendCmd = new();
 
         IoC.Resolve<ICommand>("IoC.Register", "SendCommandInGame",
-            (object[] args) => _sendCommandInGame.Object.Execute(args)
+            (object[] args) => _sendCommandInGame.Object.Invoke(args)
         ).Execute();
 
         IoC.Resolve<ICommand>("IoC.Register", "GetCommand",
-            (object[] args) => _getCommand.Object.Execute(args)
+            (object[] args) => _getCommand.Object.Invoke(args)
         ).Execute();
 
         _message.SetupGet(strategy => strategy.gameId).Returns(gameId).Verifiable();
 
-        _getCommand.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(_getCmd.Object).Verifiable();
+        _getCommand.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Returns(_getCmd.Object).Verifiable();
 
-        _sendCommandInGame.Setup(strategy => strategy.Execute(It.IsAny<object[]>())).Returns(_sendCmd.Object).Verifiable();
+        _sendCommandInGame.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Returns(_sendCmd.Object).Verifiable();
 
         _sendCmd.Setup(cmd => cmd.Execute()).Throws<InvalidCastException>().Verifiable();
 
@@ -230,9 +230,9 @@ public class InterpretateCommandTests
         Assert.Throws<InvalidCastException>(act);
 
         object[] expectArgs = new object[] { _message.Object };
-        _getCommand.Verify(strategy => strategy.Execute(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
+        _getCommand.Verify(strategy => strategy.Invoke(It.Is<object[]>(factArg => factArg[0] == expectArgs[0])), Times.Exactly(1));
 
-        _sendCommandInGame.Verify(strategy => strategy.Execute(It.Is<object[]>(
+        _sendCommandInGame.Verify(strategy => strategy.Invoke(It.Is<object[]>(
             factArg => (string)factArg[0] == gameId && factArg[1] == _getCmd.Object)), Times.Exactly(1));
 
         _sendCmd.Verify(cmd => cmd.Execute(), Times.Exactly(1));

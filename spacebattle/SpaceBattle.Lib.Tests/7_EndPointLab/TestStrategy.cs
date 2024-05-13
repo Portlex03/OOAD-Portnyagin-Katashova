@@ -20,12 +20,12 @@ public class TestStrategy
         GetInterpretateMessageCommand _getInterpretateMessageCommand = new();
 
         IoC.Resolve<ICommand>("IoC.Register", "GetInterpretateMessageCommand",
-            (object[] args) => _getInterpretateMessageCommand.Execute(args)
+            (object[] args) => _getInterpretateMessageCommand.Invoke(args)
         ).Execute();
 
         object[] nullArgs = new object[0];
 
-        var act = () => _getInterpretateMessageCommand.Execute(nullArgs);
+        var act = () => _getInterpretateMessageCommand.Invoke(nullArgs);
 
         Assert.Throws<IndexOutOfRangeException>(act);
     }
@@ -36,12 +36,12 @@ public class TestStrategy
         GetInterpretateMessageCommand _getInterpretateMessageCommand = new();
 
         IoC.Resolve<ICommand>("IoC.Register", "GetInterpretateMessageCommand",
-            (object[] args) => _getInterpretateMessageCommand.Execute(args)
+            (object[] args) => _getInterpretateMessageCommand.Invoke(args)
         ).Execute();
 
         object[] args = new object[1] { 1 };
 
-        var act = () => _getInterpretateMessageCommand.Execute(args);
+        var act = () => _getInterpretateMessageCommand.Invoke(args);
 
         Assert.Throws<InvalidCastException>(act);
     }
@@ -53,12 +53,12 @@ public class TestStrategy
         Mock<IMessage> _messageMock = new();
 
         IoC.Resolve<ICommand>("IoC.Register", "GetInterpretateMessageCommand",
-            (object[] args) => _getInterpretateMessageCommand.Execute(args)
+            (object[] args) => _getInterpretateMessageCommand.Invoke(args)
         ).Execute();
 
         object[] args = new object[1] { _messageMock.Object };
 
-        var act = () => _getInterpretateMessageCommand.Execute(args);
+        var act = () => _getInterpretateMessageCommand.Invoke(args);
 
         Assert.IsType<InterpretateCommand>(act());
     }
@@ -69,7 +69,7 @@ public class TestStrategy
         GetInterpretateMessageCommand _getInterpretateMessageCommand = new();
 
         IoC.Resolve<ICommand>("IoC.Register", "GetInterpretateMessageCommand",
-            (object[] args) => _getInterpretateMessageCommand.Execute(args)
+            (object[] args) => _getInterpretateMessageCommand.Invoke(args)
         ).Execute();
 
         Assert.Throws<IndexOutOfRangeException>(() => IoC.Resolve<ICommand>("GetInterpretateMessageCommand"));

@@ -27,7 +27,7 @@ public class ExceptionHandlerTest
         Mock<IStrategy> getQuantCmd = new();
         IoC.Resolve<ICommand>(
             "IoC.Register", "Game.Quant",
-            (object[] args) => getQuantCmd.Object.Execute()
+            (object[] args) => getQuantCmd.Object.Invoke()
         ).Execute();
 
         Dictionary<object, object> exHandlerDict = new();
@@ -56,7 +56,7 @@ public class ExceptionHandlerTest
             IoC.Resolve<object>("Scopes.New", _scope), q);
 
         var quant = 50;
-        getQuantCmd.Setup(cmd => cmd.Execute()).Returns(quant);
+        getQuantCmd.Setup(cmd => cmd.Invoke()).Returns(quant);
 
         Assert.Throws<Exception>(gameAsCommand.Execute);
         exCmd.Verify(cmd => cmd.Execute(), Times.Once());
@@ -68,7 +68,7 @@ public class ExceptionHandlerTest
         Mock<IStrategy> getQuantCmd = new();
         IoC.Resolve<ICommand>(
             "IoC.Register", "Game.Quant",
-            (object[] args) => getQuantCmd.Object.Execute()
+            (object[] args) => getQuantCmd.Object.Invoke()
         ).Execute();
 
         Dictionary<object, object> exHandlerDict = new();
@@ -99,7 +99,7 @@ public class ExceptionHandlerTest
             IoC.Resolve<object>("Scopes.New", _scope), q);
 
         var quant = 50;
-        getQuantCmd.Setup(cmd => cmd.Execute()).Returns(quant);
+        getQuantCmd.Setup(cmd => cmd.Invoke()).Returns(quant);
 
         gameAsCommand.Execute();
 

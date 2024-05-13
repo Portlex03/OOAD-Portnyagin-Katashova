@@ -9,7 +9,7 @@ using QueueDict = System.Collections.Concurrent.ConcurrentDictionary<int, System
 
 public class RegisterIoCScope : IStrategy
 {
-    public object Execute(params object[] args)
+    public object Invoke(params object[] args)
     {
         return IoC.Resolve<ICommand>(
             "Scopes.Current.Set",
@@ -22,7 +22,7 @@ public class RegisterIoCScope : IStrategy
 
 public class RegisterGetThreadSenderDictCommand : IStrategy
 {
-    public object Execute(params object[] args)
+    public object Invoke(params object[] args)
     {
         var senderDict = new QueueDict();
         return IoC.Resolve<ICommand>(
@@ -34,7 +34,7 @@ public class RegisterGetThreadSenderDictCommand : IStrategy
 
 public class RegisterGetThreadDictCommand : IStrategy
 {
-    public object Execute(params object[] args)
+    public object Invoke(params object[] args)
     {
         var threadDict = new ThreadDict();
         return IoC.Resolve<ICommand>(
@@ -46,7 +46,7 @@ public class RegisterGetThreadDictCommand : IStrategy
 
 public class RegisterSendCommand : IStrategy
 {
-    public object Execute(params object[] args)
+    public object Invoke(params object[] args)
     {
         return IoC.Resolve<ICommand>(
             "IoC.Register", "Thread.SendCommand",
@@ -65,7 +65,7 @@ public class RegisterSendCommand : IStrategy
 
 public class RegisterServerThreadCreateAndStartCommand : IStrategy
 {
-    public object Execute(params object[] args)
+    public object Invoke(params object[] args)
     {
         return IoC.Resolve<ICommand>(
             "IoC.Register", "Thread.Create&Start",
@@ -95,7 +95,7 @@ public class RegisterServerThreadCreateAndStartCommand : IStrategy
 
 public class RegisterHardStopCommand : IStrategy
 {
-    public object Execute(params object[] args)
+    public object Invoke(params object[] args)
     {
         return IoC.Resolve<ICommand>(
             "IoC.Register", "Thread.HardStop",
@@ -115,7 +115,7 @@ public class RegisterHardStopCommand : IStrategy
 
 public class RegisterSoftStopCommand : IStrategy
 {
-    public object Execute(params object[] args)
+    public object Invoke(params object[] args)
     {
         return IoC.Resolve<ICommand>(
             "IoC.Register", "Thread.SoftStop",
@@ -135,7 +135,7 @@ public class RegisterSoftStopCommand : IStrategy
 
 public class RegisterExceptionHandlerCommand : IStrategy
 {
-    public object Execute(params object[] args)
+    public object Invoke(params object[] args)
     {
         var exceptionHandler = new Mock<ICommand>();
         return IoC.Resolve<ICommand>(

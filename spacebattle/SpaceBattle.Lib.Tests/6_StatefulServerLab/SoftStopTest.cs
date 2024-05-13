@@ -14,20 +14,20 @@ public class SoftStopTest
     {
         new InitScopeBasedIoCImplementationCommand().Execute();
 
-        _newScope = (ICommand)new RegisterIoCScope().Execute();
+        _newScope = (ICommand)new RegisterIoCScope().Invoke();
         _newScope.Execute();
 
-        ((ICommand)new RegisterGetThreadSenderDictCommand().Execute()).Execute();
+        ((ICommand)new RegisterGetThreadSenderDictCommand().Invoke()).Execute();
 
-        ((ICommand)new RegisterGetThreadDictCommand().Execute()).Execute();
+        ((ICommand)new RegisterGetThreadDictCommand().Invoke()).Execute();
 
-        ((ICommand)new RegisterSendCommand().Execute()).Execute();
+        ((ICommand)new RegisterSendCommand().Invoke()).Execute();
 
-        ((ICommand)new RegisterServerThreadCreateAndStartCommand().Execute()).Execute();
+        ((ICommand)new RegisterServerThreadCreateAndStartCommand().Invoke()).Execute();
 
-        ((ICommand)new RegisterHardStopCommand().Execute()).Execute();
+        ((ICommand)new RegisterHardStopCommand().Invoke()).Execute();
 
-        ((ICommand)new RegisterSoftStopCommand().Execute()).Execute();
+        ((ICommand)new RegisterSoftStopCommand().Invoke()).Execute();
     }
 
     [Fact]
