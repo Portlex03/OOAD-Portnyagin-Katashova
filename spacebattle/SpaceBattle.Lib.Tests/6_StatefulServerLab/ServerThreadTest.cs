@@ -13,18 +13,18 @@ public class ServerThreadTest
     {
         new InitScopeBasedIoCImplementationCommand().Execute();
 
-        _newScope = (ICommand)new RegisterIoCScope().Execute();
+        _newScope = (ICommand)new RegisterIoCScope().Invoke();
         _newScope.Execute();
 
-        ((ICommand)new RegisterGetThreadSenderDictCommand().Execute()).Execute();
+        ((ICommand)new RegisterGetThreadSenderDictCommand().Invoke()).Execute();
 
-        ((ICommand)new RegisterGetThreadDictCommand().Execute()).Execute();
+        ((ICommand)new RegisterGetThreadDictCommand().Invoke()).Execute();
 
-        ((ICommand)new RegisterSendCommand().Execute()).Execute();
+        ((ICommand)new RegisterSendCommand().Invoke()).Execute();
 
-        ((ICommand)new RegisterServerThreadCreateAndStartCommand().Execute()).Execute();
+        ((ICommand)new RegisterServerThreadCreateAndStartCommand().Invoke()).Execute();
 
-        ((ICommand)new RegisterHardStopCommand().Execute()).Execute();
+        ((ICommand)new RegisterHardStopCommand().Invoke()).Execute();
     }
 
     [Fact]
@@ -48,7 +48,7 @@ public class ServerThreadTest
 
         IoC.Resolve<ICommand>(
             "Thread.SendCommand", threadId,
-            (ICommand)new RegisterExceptionHandlerCommand().Execute()
+            (ICommand)new RegisterExceptionHandlerCommand().Invoke()
         ).Execute();
 
         IoC.Resolve<ICommand>("Thread.SendCommand", threadId, usualCommand.Object).Execute();
