@@ -1,9 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches:
-      - 'Lab**'
   pull_request:
     branches:
       - main
