@@ -1,18 +1,17 @@
 namespace SpaceBattle.Lib;
-using Hwdtech;
 
 public class PositionsEnumerator : IEnumerator<object>
 {
-    readonly IList<Vector> _positions;
+    readonly IList<Vector> _uObjectPositions;
     int _positionIndex;
 
-    public PositionsEnumerator() => _positions = IoC.Resolve<List<Vector>>("UObjectsPositions");
+    public PositionsEnumerator(IList<Vector> uObjectPositions) => _uObjectPositions = uObjectPositions;
 
-    public object Current => _positions[_positionIndex];
+    public object Current => _uObjectPositions[_positionIndex];
 
-    public bool MoveNext() => ++_positionIndex < _positions.Count;
+    public bool MoveNext() => ++_positionIndex < _uObjectPositions.Count;
 
     public void Reset() => _positionIndex = 0;
 
-    public void Dispose() => throw new NotImplementedException();
+    public void Dispose() => GC.SuppressFinalize(this);
 }
