@@ -3,20 +3,19 @@ using Hwdtech;
 
 public class ArrangeUObjectsCommand : ICommand
 {
-    readonly IEnumerator<object> _positionsEnumerator;
+    readonly IEnumerable<IUObject> _uObjectsCollection;
 
-    public ArrangeUObjectsCommand(IEnumerator<object> positionsEnumerator) => _positionsEnumerator = positionsEnumerator;
+    public ArrangeUObjectsCommand(IEnumerable<IUObject> uObjectsCollection) => _uObjectsCollection = uObjectsCollection;
 
     public void Execute()
     {
-        var uObjectsDict = IoC.Resolve<Dictionary<Guid, IUObject>>("UObjectsDict");
-        _positionsEnumerator.Reset();
-
-        uObjectsDict.ToList().ForEach(
-            idAndUObject =>
+        using IEnumerator<object> positionsEnumerator = IoC.Resolve<IEnumerator<object>>("PositionsEnumerator");
+        positionsEnumerator.Reset();
+        _uObjectsCollection.ToList().ForEach(
+            uObject =>
             {
-                IoC.Resolve<ICommand>("UObject.SetProperty", idAndUObject.Value, "Position", _positionsEnumerator.Current).Execute();
-                _positionsEnumerator.MoveNext();
+                IoC.Resolve<ICommand>("UObject.SetProperty", uObject, "Position", positionsEnumerator.Current).Execute();
+                positionsEnumerator.MoveNext();
             }
         );
     }
