@@ -1,15 +1,13 @@
 namespace SpaceBattle.Lib;
 using Hwdtech;
 
-public class CreateUObjectsCommand : ICommand
+public class CreateUObjectsCommand : IStrategy
 {
-    readonly int _uObjectsCount;
-    public CreateUObjectsCommand(int uObjectsCount) => _uObjectsCount = uObjectsCount;
-
-    public void Execute()
+    public object Invoke(params object[] args)
     {
-        var uObjectsDict = IoC.Resolve<Dictionary<Guid, IUObject>>("UObjectsDict");
-
-        Enumerable.Range(0, _uObjectsCount).ToList().ForEach(uObject => uObjectsDict.Add(Guid.NewGuid(), IoC.Resolve<IUObject>("CreateUObject")));
+        return Enumerable.Range(0, (int)args[0]).ToDictionary(
+            key => Guid.NewGuid(),
+            value => IoC.Resolve<IUObject>("CreateSingleUObject")
+            );
     }
 }
