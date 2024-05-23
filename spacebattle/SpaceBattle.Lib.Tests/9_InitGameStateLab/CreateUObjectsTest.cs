@@ -17,77 +17,36 @@ public class CreateUObjectsTest
     [Fact]
     public void Successful_Creating_Empty_UObjects()
     {
-        var uObjectsDict = new Dictionary<Guid, IUObject>();
-
-        var getUObjectsDictStrategy = new Mock<IStrategy>();
-        getUObjectsDictStrategy.Setup(s => s.Invoke(It.IsAny<object[]>())).Returns(uObjectsDict);
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "UObjectsDict",
-            (object[] args) => getUObjectsDictStrategy.Object.Invoke(args)
-        ).Execute();
-
         var createUObjectsStrategy = new Mock<IStrategy>();
         IoC.Resolve<ICommand>(
-            "IoC.Register", "CreateUObject",
+            "IoC.Register", "CreateSingleUObject",
             (object[] args) => createUObjectsStrategy.Object.Invoke(args)
         ).Execute();
 
-        var uObjectsCount = 10;
+        var uObjectsCount = 6;
 
-        var createUObjectsCmd = new CreateUObjectsCommand(uObjectsCount);
-        createUObjectsCmd.Execute();
+        var createUObjectsCmd = new CreateUObjectsCommand();
+
+        var uObjectsCollection = (Dictionary<Guid, IUObject>)createUObjectsCmd.Invoke(uObjectsCount);
 
         createUObjectsStrategy.Verify(s => s.Invoke(), Times.Exactly(uObjectsCount));
-        Assert.True(uObjectsDict.Count == uObjectsCount);
     }
 
     [Fact]
-    public void Impossible_To_Get_UObjects_Map()
+    public void Impossible_To_Create_Single_UObject()
     {
-        var uObjectsDict = new Dictionary<Guid, IUObject>();
-
-        var getUObjectsDictStrategy = new Mock<IStrategy>();
-        getUObjectsDictStrategy.Setup(s => s.Invoke(It.IsAny<object[]>())).Throws<Exception>().Verifiable();
+        var createSingleUObjectStrategy = new Mock<IStrategy>();
+        createSingleUObjectStrategy.Setup(s => s.Invoke(It.IsAny<object[]>())).Throws<Exception>().Verifiable();
         IoC.Resolve<ICommand>(
-            "IoC.Register", "UObjectsDict",
-            (object[] args) => getUObjectsDictStrategy.Object.Invoke(args)
+            "IoC.Register", "CreateSingleUObject",
+            (object[] args) => createSingleUObjectStrategy.Object.Invoke(args)
         ).Execute();
 
-        var createUObjectsStrategy = new Mock<IStrategy>();
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "CreateUObject",
-            (object[] args) => createUObjectsStrategy.Object.Invoke(args)
-        ).Execute();
+        var uObjectsCount = 6;
 
-        var createUObjectsCmd = new CreateUObjectsCommand(10);
+        var createUObjectsCmd = new ActionCommand(() => new CreateUObjectsCommand().Invoke(uObjectsCount));
 
         Assert.Throws<Exception>(createUObjectsCmd.Execute);
-        getUObjectsDictStrategy.Verify();
-        createUObjectsStrategy.Verify(s => s.Invoke(), Times.Never);
-    }
-
-    [Fact]
-    public void Impossible_To_Create_UObject()
-    {
-        var uObjectsDict = new Dictionary<Guid, IUObject>();
-
-        var getUObjectsDictStrategy = new Mock<IStrategy>();
-        getUObjectsDictStrategy.Setup(s => s.Invoke(It.IsAny<object[]>())).Returns(uObjectsDict);
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "UObjectsDict",
-            (object[] args) => getUObjectsDictStrategy.Object.Invoke(args)
-        ).Execute();
-
-        var createUObjectsStrategy = new Mock<IStrategy>();
-        createUObjectsStrategy.Setup(s => s.Invoke(It.IsAny<object[]>())).Throws<Exception>().Verifiable();
-        IoC.Resolve<ICommand>(
-            "IoC.Register", "CreateUObject",
-            (object[] args) => createUObjectsStrategy.Object.Invoke(args)
-        ).Execute();
-
-        var createUObjectsCmd = new CreateUObjectsCommand(10);
-
-        Assert.Throws<Exception>(createUObjectsCmd.Execute);
-        createUObjectsStrategy.Verify();
+        createSingleUObjectStrategy.Verify();
     }
 }
