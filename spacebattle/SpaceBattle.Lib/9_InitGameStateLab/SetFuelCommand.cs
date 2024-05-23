@@ -1,15 +1,16 @@
 namespace SpaceBattle.Lib;
 using Hwdtech;
 
-public class SetFuelVolumeCommand : ICommand
+public class SetFuelCommand : ICommand
 {
-    readonly double _fuelVolume;
-    public SetFuelVolumeCommand(double fuelVolume) => _fuelVolume = fuelVolume;
+    private readonly IFuelBurnable _uObject;
+    private readonly double _fuelVolume;
 
-    public void Execute()
+    public SetFuelCommand(IFuelBurnable uObject, double fuelVolume)
     {
-        var uObjectsDict = IoC.Resolve<Dictionary<Guid, IUObject>>("UObjectsDict");
-
-        uObjectsDict.ToList().ForEach(idAndUObject => IoC.Resolve<ICommand>("UObject.SetProperty", idAndUObject.Value, "Fuel", _fuelVolume).Execute());
+        _uObject = uObject;
+        _fuelVolume = fuelVolume;
     }
+
+    public void Execute() => _uObject.FuelVolume = _fuelVolume;
 }
