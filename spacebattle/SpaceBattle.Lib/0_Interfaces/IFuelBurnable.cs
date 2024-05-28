@@ -2,5 +2,5 @@ namespace SpaceBattle.Lib;
 
 public interface IFuelBurnable
 {
-    double FuelVolume { set; }
+    double FuelVolume { get; set; }
 }

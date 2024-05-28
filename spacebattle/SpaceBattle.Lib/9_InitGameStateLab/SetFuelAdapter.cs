@@ -8,6 +8,8 @@ public class SetFuelAdapter : IFuelBurnable
 
     public double FuelVolume
     {
+        get => IoC.Resolve<double>("UObject.GetProperty", "FuelVolume", _uobject);
+
         set => IoC.Resolve<ICommand>("UObject.SetProperty", "FuelVolume", _uobject, value).Execute();
     }
 }
