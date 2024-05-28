@@ -62,6 +62,38 @@ public class SetFuelVolumeTests
     }
 
     [Fact]
+    public void Successful_Getting_Fuel_Volume_Of_FuelBurnable_Object()
+    {
+        var getUObjectPropertyCmd = new Mock<IStrategy>();
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "UObject.GetProperty",
+            (object[] args) => getUObjectPropertyCmd.Object.Invoke(args)
+        ).Execute();
+
+        IoC.Resolve<ICommand>(
+            "IoC.Register", "UObject.SetProperty",
+            (object[] args) =>
+            {
+                return new ActionCommand(() =>
+                {
+                    getUObjectPropertyCmd.Setup(s => s.Invoke(It.IsAny<object[]>())).Returns(args[2]);
+                });
+            }
+        ).Execute();
+
+        var fuelVolume = 100;
+
+        var uObject = new Mock<IUObject>();
+
+        var fuelBurnableAdapter = new SetFuelAdapter(uObject.Object);
+
+        var setFuelCmd = new SetFuelCommand(fuelBurnableAdapter, fuelVolume);
+        setFuelCmd.Execute();
+
+        Assert.True(fuelBurnableAdapter.FuelVolume == fuelVolume);
+    }
+
+    [Fact]
     public void Impossible_To_Set_Property_To_UObject()
     {
         var setUObjectPropertyCmd = new Mock<ICommand>();
