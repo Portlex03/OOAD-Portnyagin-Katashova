@@ -11,7 +11,7 @@ public class QueueEnqueueCommandTests
         Queue<ICommand> queue = new();
         Mock<ICommand> mockCommand = new();
 
-        QueueEnqueueCommand queueEnqueueCommand= new(queue, mockCommand.Object);
+        QueueEnqueueCommand queueEnqueueCommand = new(queue, mockCommand.Object);
 
         try
         {
