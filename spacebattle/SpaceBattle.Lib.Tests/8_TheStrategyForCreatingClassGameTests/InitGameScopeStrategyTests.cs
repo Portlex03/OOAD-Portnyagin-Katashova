@@ -21,14 +21,14 @@ public class InitGameScopeStrategyTests
         Mock<IStrategy> mockGetGameIdStrategy = new();
         String gameId = "id";
         Mock<object> quantumTime = new();
-        
+
         mockGetGameIdStrategy.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Returns(gameId).Verifiable();
 
         IoC.Resolve<ICommand>("IoC.Register", "Games.Id.GetNew",
             (object[] args) => mockGetGameIdStrategy.Object.Invoke(args)
         ).Execute();
 
-        InitGameScopeStrategy initGameScopeStrategy= new InitGameScopeStrategy();
+        InitGameScopeStrategy initGameScopeStrategy = new InitGameScopeStrategy();
 
         object scope = initGameScopeStrategy.Invoke(quantumTime.Object);
         object oldScope = IoC.Resolve<object>("Scopes.Current");
@@ -55,7 +55,7 @@ public class InitGameScopeStrategyTests
             (object[] args) => mockGetGameIdStrategy.Object.Invoke(args)
         ).Execute();
 
-        InitGameScopeStrategy initGameScopeStrategy= new InitGameScopeStrategy();
+        InitGameScopeStrategy initGameScopeStrategy = new InitGameScopeStrategy();
 
         object scope = initGameScopeStrategy.Invoke(quantumTime.Object);
         object oldScope = IoC.Resolve<object>("Scopes.Current");
@@ -82,7 +82,7 @@ public class InitGameScopeStrategyTests
             (object[] args) => mockGetGameIdStrategy.Object.Invoke(args)
         ).Execute();
 
-        InitGameScopeStrategy initGameScopeStrategy= new InitGameScopeStrategy();
+        InitGameScopeStrategy initGameScopeStrategy = new InitGameScopeStrategy();
 
         object scope = initGameScopeStrategy.Invoke(quantumTime.Object);
         object oldScope = IoC.Resolve<object>("Scopes.Current");
@@ -110,7 +110,7 @@ public class InitGameScopeStrategyTests
             (object[] args) => mockGetGameIdStrategy.Object.Invoke(args)
         ).Execute();
 
-        InitGameScopeStrategy initGameScopeStrategy= new InitGameScopeStrategy();
+        InitGameScopeStrategy initGameScopeStrategy = new InitGameScopeStrategy();
 
         object scope = initGameScopeStrategy.Invoke(quantumTime.Object);
         object oldScope = IoC.Resolve<object>("Scopes.Current");
@@ -131,14 +131,14 @@ public class InitGameScopeStrategyTests
         Mock<IStrategy> mockGetGameIdStrategy = new();
         String gameId = "id";
         Mock<object> quantumTime = new();
-        
+
         mockGetGameIdStrategy.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Returns(gameId).Verifiable();
 
         IoC.Resolve<ICommand>("IoC.Register", "Games.Id.GetNew",
             (object[] args) => mockGetGameIdStrategy.Object.Invoke(args)
         ).Execute();
 
-        InitGameScopeStrategy initGameScopeStrategy= new InitGameScopeStrategy();
+        InitGameScopeStrategy initGameScopeStrategy = new InitGameScopeStrategy();
 
         object scope = initGameScopeStrategy.Invoke(quantumTime.Object);
         object oldScope = IoC.Resolve<object>("Scopes.Current");
@@ -165,14 +165,14 @@ public class InitGameScopeStrategyTests
         Mock<IStrategy> mockGetGameIdStrategy = new();
         String gameId = "id";
         Mock<object> quantumTime = new();
-        
+
         mockGetGameIdStrategy.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Returns(gameId).Verifiable();
 
         IoC.Resolve<ICommand>("IoC.Register", "Games.Id.GetNew",
             (object[] args) => mockGetGameIdStrategy.Object.Invoke(args)
         ).Execute();
 
-        InitGameScopeStrategy initGameScopeStrategy= new InitGameScopeStrategy();
+        InitGameScopeStrategy initGameScopeStrategy = new InitGameScopeStrategy();
 
         object scope = initGameScopeStrategy.Invoke(quantumTime.Object);
         object oldScope = IoC.Resolve<object>("Scopes.Current");
@@ -190,14 +190,14 @@ public class InitGameScopeStrategyTests
         Mock<IStrategy> mockGetGameIdStrategy = new();
         String gameId = "id";
         Mock<object> quantumTime = new();
-        
+
         mockGetGameIdStrategy.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Returns(gameId).Verifiable();
 
         IoC.Resolve<ICommand>("IoC.Register", "Games.Id.GetNew",
             (object[] args) => mockGetGameIdStrategy.Object.Invoke(args)
         ).Execute();
 
-        InitGameScopeStrategy initGameScopeStrategy= new InitGameScopeStrategy();
+        InitGameScopeStrategy initGameScopeStrategy = new InitGameScopeStrategy();
 
         object scope = initGameScopeStrategy.Invoke(quantumTime.Object);
         object oldScope = IoC.Resolve<object>("Scopes.Current");
@@ -223,14 +223,14 @@ public class InitGameScopeStrategyTests
         Mock<IStrategy> mockGetGameIdStrategy = new();
         String gameId = "id";
         Mock<object> quantumTime = new();
-        
+
         mockGetGameIdStrategy.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Returns(gameId).Verifiable();
 
         IoC.Resolve<ICommand>("IoC.Register", "Games.Id.GetNew",
             (object[] args) => mockGetGameIdStrategy.Object.Invoke(args)
         ).Execute();
 
-        InitGameScopeStrategy initGameScopeStrategy= new InitGameScopeStrategy();
+        InitGameScopeStrategy initGameScopeStrategy = new InitGameScopeStrategy();
 
         object scope = initGameScopeStrategy.Invoke(quantumTime.Object);
         object oldScope = IoC.Resolve<object>("Scopes.Current");
@@ -249,7 +249,7 @@ public class InitGameScopeStrategyTests
     {
         Mock<IStrategy> mockGetGameIdStrategy = new();
         Mock<object> quantumTime = new();
-        
+
         mockGetGameIdStrategy.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Throws<InvalidOperationException>().Verifiable();
 
         IoC.Resolve<ICommand>("IoC.Register", "Games.Id.GetNew",
@@ -268,14 +268,14 @@ public class InitGameScopeStrategyTests
     {
         Mock<IStrategy> mockGetGameIdStrategy = new();
         String gameId = "id";
-        
+
         mockGetGameIdStrategy.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Returns(gameId).Verifiable();
 
         IoC.Resolve<ICommand>("IoC.Register", "Games.Id.GetNew",
             (object[] args) => mockGetGameIdStrategy.Object.Invoke(args)
         ).Execute();
 
-        InitGameScopeStrategy initGameScopeStrategy= new InitGameScopeStrategy();
+        InitGameScopeStrategy initGameScopeStrategy = new InitGameScopeStrategy();
 
         Assert.Throws<IndexOutOfRangeException>(() => initGameScopeStrategy.Invoke());
 
@@ -288,14 +288,14 @@ public class InitGameScopeStrategyTests
         Mock<IStrategy> mockGetGameIdStrategy = new();
         String gameId = "id";
         Mock<object> quantumTime = new();
-        
+
         mockGetGameIdStrategy.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Returns(gameId).Verifiable();
 
         IoC.Resolve<ICommand>("IoC.Register", "Games.Id.GetNew",
             (object[] args) => mockGetGameIdStrategy.Object.Invoke(args)
         ).Execute();
 
-        InitGameScopeStrategy initGameScopeStrategy= new InitGameScopeStrategy();
+        InitGameScopeStrategy initGameScopeStrategy = new InitGameScopeStrategy();
 
         object scope = initGameScopeStrategy.Invoke(quantumTime.Object);
         object oldScope = IoC.Resolve<object>("Scopes.Current");
@@ -315,14 +315,14 @@ public class InitGameScopeStrategyTests
         Mock<IStrategy> mockGetGameIdStrategy = new();
         String gameId = "id";
         Mock<object> quantumTime = new();
-        
+
         mockGetGameIdStrategy.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Returns(gameId).Verifiable();
 
         IoC.Resolve<ICommand>("IoC.Register", "Games.Id.GetNew",
             (object[] args) => mockGetGameIdStrategy.Object.Invoke(args)
         ).Execute();
 
-        InitGameScopeStrategy initGameScopeStrategy= new InitGameScopeStrategy();
+        InitGameScopeStrategy initGameScopeStrategy = new InitGameScopeStrategy();
 
         object scope = initGameScopeStrategy.Invoke(quantumTime.Object);
         object oldScope = IoC.Resolve<object>("Scopes.Current");
@@ -340,14 +340,14 @@ public class InitGameScopeStrategyTests
         Mock<IStrategy> mockGetGameIdStrategy = new();
         String gameId = "id";
         Mock<object> quantumTime = new();
-        
+
         mockGetGameIdStrategy.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Returns(gameId).Verifiable();
 
         IoC.Resolve<ICommand>("IoC.Register", "Games.Id.GetNew",
             (object[] args) => mockGetGameIdStrategy.Object.Invoke(args)
         ).Execute();
 
-        InitGameScopeStrategy initGameScopeStrategy= new InitGameScopeStrategy();
+        InitGameScopeStrategy initGameScopeStrategy = new InitGameScopeStrategy();
 
         object scope = initGameScopeStrategy.Invoke(quantumTime.Object);
         object oldScope = IoC.Resolve<object>("Scopes.Current");
@@ -367,14 +367,14 @@ public class InitGameScopeStrategyTests
         Mock<IStrategy> mockGetGameIdStrategy = new();
         String gameId = "id";
         Mock<object> quantumTime = new();
-        
+
         mockGetGameIdStrategy.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Returns(gameId).Verifiable();
 
         IoC.Resolve<ICommand>("IoC.Register", "Games.Id.GetNew",
             (object[] args) => mockGetGameIdStrategy.Object.Invoke(args)
         ).Execute();
 
-        InitGameScopeStrategy initGameScopeStrategy= new InitGameScopeStrategy();
+        InitGameScopeStrategy initGameScopeStrategy = new InitGameScopeStrategy();
 
         object scope = initGameScopeStrategy.Invoke(quantumTime.Object);
         object oldScope = IoC.Resolve<object>("Scopes.Current");
