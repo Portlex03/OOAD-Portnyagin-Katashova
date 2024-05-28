@@ -20,7 +20,7 @@ public class CreateGameStrategyTests
     {
         Mock<IStrategy> mockGetGameIdStrategy = new();
         Mock<object> quantumTime = new();
-        
+
         mockGetGameIdStrategy.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Throws<InvalidOperationException>().Verifiable();
 
         IoC.Resolve<ICommand>("IoC.Register", "Games.Id.GetNew",
@@ -35,11 +35,11 @@ public class CreateGameStrategyTests
     }
 
     [Fact]
-    public  void ArgsEmptyScopeThrowsExceptionTest()
+    public void ArgsEmptyScopeThrowsExceptionTest()
     {
         String gameId = "id1";
         Mock<IStrategy> mockGetGameIdStrategy = new();
-        
+
         mockGetGameIdStrategy.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Returns(gameId).Verifiable();
 
         IoC.Resolve<ICommand>("IoC.Register", "Games.Id.GetNew",
@@ -62,13 +62,13 @@ public class CreateGameStrategyTests
         Mock<IStrategy> mockGetGameAsCommandStrategy = new();
 
         mockGetGameIdStrategy.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Returns(gameId).Verifiable();
-        mockGetGameAsCommandStrategy.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Throws<InvalidOperationException>().Verifiable();;
+        mockGetGameAsCommandStrategy.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Throws<InvalidOperationException>().Verifiable();
 
-        IoC.Resolve<ICommand>("IoC.Register", "Games.Id.GetNew", 
+        IoC.Resolve<ICommand>("IoC.Register", "Games.Id.GetNew",
             (object[] args) => mockGetGameIdStrategy.Object.Invoke(args)
         ).Execute();
 
-        IoC.Resolve<ICommand>("IoC.Register", "Commands.GameAsCommand", 
+        IoC.Resolve<ICommand>("IoC.Register", "Commands.GameAsCommand",
             (object[] args) => mockGetGameAsCommandStrategy.Object.Invoke(args)
         ).Execute();
 
@@ -78,7 +78,7 @@ public class CreateGameStrategyTests
 
         mockGetGameIdStrategy.Verify(strategy => strategy.Invoke(It.Is<object[]>(factArgs => factArgs.Count() == 0)), Times.Exactly(1));
         object typeScope = new InitGameScopeStrategy().Invoke(quantumTime);
-        mockGetGameAsCommandStrategy.Verify(strategy => strategy.Invoke(It.Is<object[]>(factArgs => 
+        mockGetGameAsCommandStrategy.Verify(strategy => strategy.Invoke(It.Is<object[]>(factArgs =>
             factArgs[0].GetType() == typeScope.GetType() && factArgs[1] is Queue<ICommand>)), Times.Exactly(1));
     }
 
@@ -92,13 +92,13 @@ public class CreateGameStrategyTests
         Mock<ICommand> returnCommand = new();
 
         mockGetGameIdStrategy.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Returns(gameId).Verifiable();
-        mockGetGameAsCommandStrategy.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Returns(returnCommand.Object).Verifiable();;
+        mockGetGameAsCommandStrategy.Setup(strategy => strategy.Invoke(It.IsAny<object[]>())).Returns(returnCommand.Object).Verifiable();
 
-        IoC.Resolve<ICommand>("IoC.Register", "Games.Id.GetNew", 
+        IoC.Resolve<ICommand>("IoC.Register", "Games.Id.GetNew",
             (object[] args) => mockGetGameIdStrategy.Object.Invoke(args)
         ).Execute();
 
-        IoC.Resolve<ICommand>("IoC.Register", "Commands.GameAsCommand", 
+        IoC.Resolve<ICommand>("IoC.Register", "Commands.GameAsCommand",
             (object[] args) => mockGetGameAsCommandStrategy.Object.Invoke(args)
         ).Execute();
 
@@ -110,7 +110,7 @@ public class CreateGameStrategyTests
 
         mockGetGameIdStrategy.Verify(strategy => strategy.Invoke(It.IsAny<object[]>()), Times.Exactly(1));
         object typeScope = new InitGameScopeStrategy().Invoke(quantumTime);
-        mockGetGameAsCommandStrategy.Verify(strategy => strategy.Invoke(It.Is<object[]>(factArgs => 
+        mockGetGameAsCommandStrategy.Verify(strategy => strategy.Invoke(It.Is<object[]>(factArgs =>
             factArgs[0].GetType() == typeScope.GetType() && factArgs[1] is Queue<ICommand>)), Times.Exactly(1));
     }
 }
