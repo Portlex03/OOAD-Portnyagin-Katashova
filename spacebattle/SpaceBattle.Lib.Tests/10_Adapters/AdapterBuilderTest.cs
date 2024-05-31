@@ -64,10 +64,10 @@ public class AdapterBuilderTest
         var getTemplateCmd = new Mock<IStrategy>();
         IoC.Resolve<ICommand>(
             "IoC.Register", "Template",
-            (object[] args) => getTemplateCmd.Object.Execute(args)
+            (object[] args) => getTemplateCmd.Object.Invoke(args)
         ).Execute();
 
-        getTemplateCmd.Setup(cmd => cmd.Execute()).Returns(_template);
+        getTemplateCmd.Setup(cmd => cmd.Invoke()).Returns(_template);
 
         var builder = new AdapterBuilder(
             targetType: typeof(IUObject),
@@ -83,10 +83,10 @@ public class AdapterBuilderTest
         var getTemplateCmd = new Mock<IStrategy>();
         IoC.Resolve<ICommand>(
             "IoC.Register", "Template",
-            (object[] args) => getTemplateCmd.Object.Execute(args)
+            (object[] args) => getTemplateCmd.Object.Invoke(args)
         ).Execute();
 
-        getTemplateCmd.Setup(cmd => cmd.Execute()).Throws<Exception>();
+        getTemplateCmd.Setup(cmd => cmd.Invoke()).Throws<Exception>();
 
         var builder = new AdapterBuilder(
             targetType: typeof(IUObject),
